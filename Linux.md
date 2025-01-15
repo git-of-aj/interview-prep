@@ -354,6 +354,25 @@ Each partition is treated as an independent storage area by the operating system
 
 Each partition can have its own filesystem (e.g., ext4, NTFS) and hold different data.
 
+------
+
+![image](https://github.com/user-attachments/assets/73bfc4bb-3ab6-4833-939d-c24051e89b69)
+
+![image](https://github.com/user-attachments/assets/c9935fbd-50bc-4151-abd6-787232f4ff3a)
+
+- Process Id: It's a unique Id provided to all processes. It is used to identify a running process uniquely throughout the computer until the process ends.
+
+- INODE: It's a unique name provided to all files by the operating system. All inodes have a unique inode number in a file system. INODE stores many details about files, including the number of links, access mode, file type, file size, ownership, etc.
+- Swap space is used to specify a space which is used by Linux to hold some concurrent running program temporarily. It is used when RAM does not have enough space to hold all programs that are executing.
+swap space is a space on the hard disk used when the RAM or physical memory amount is full. It's a replacement for physical memory. Its primary function is to replace disk space for memory when actual RAM doesn't have sufficient space to hold every program that is running, and more space is needed. In other words, it can be used as a RAM extension by Linux. Swap partition size -- double the amount of RAM or physical memory available in the system. 
+
+![image](https://github.com/user-attachments/assets/4eb23d5e-b139-421e-8fe0-6d6f34ea9315)
+1. New/Ready: A new process is made and is ready to execute.
+2. Running: The process is being run.
+3. Blocked/Wait: The process waits for input through the user, and if it does not have resources to execute, such as input, file locks, and memory, it can remain in a blocked or waiting state.
+4. Completed/Terminated: The process has been terminated by the operating system or finished the execution.
+5. Zombie: The process is aborted, but information related to the process is still available and is available within the process table
+
 
 
 
