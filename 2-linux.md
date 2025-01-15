@@ -1,5 +1,63 @@
 ssh -v -i test.pem aj@98.70.48.210
 
+## process vs thread
+In a Linux environment, processes can contain multiple threads. A process is created when you launch an application, and threads within the process allow it to perform tasks concurrently. Threads share the process’s memory, making them more lightweight than creating new processes.
+
+Link:
+A process is a container for threads.
+Threads within the same process share resources like memory, file descriptors, etc.
+
+```sh
+Process:
+  |
+  |--> Independent memory space
+  |--> Has its own resources
+  |--> Slower due to isolation
+
+Thread:
+  |
+  |--> Shares memory with other threads
+  |--> Lighter and faster
+  |--> Easier to communicate within process
+```
+
+The command `ps -eLf` shows detailed information about processes and threads in Linux. Here's an explanation of the output:
+
+### Columns:
+- **UID**: User ID of the process owner.
+- **PID**: Process ID, the unique identifier for a process.
+- **PPID**: Parent Process ID, the process ID of the parent process.
+- **LWP**: Light Weight Process ID, the thread ID (unique within a process).
+- **C**: CPU utilization.
+- **NLWP**: Number of threads in the process.
+- **STIME**: Start time of the process.
+- **TTY**: Terminal associated with the process (if applicable).
+- **TIME**: CPU time consumed by the process.
+- **CMD**: Command that started the process.
+
+### Example Breakdown:
+1. **First row**:
+   - **PID 1**: The main init process (`/sbin/init`), started by the kernel during boot.
+   - **LWP 1**: The init process has a single thread, so the LWP is the same as PID.
+   - **NLWP 1**: The init process only has one thread.
+
+2. **Second row**:
+   - **PID 2**: A kernel thread (`kthreadd`), responsible for managing other kernel threads.
+   - **LWP 2**: The `kthreadd` kernel thread has LWP 2.
+   - **NLWP 1**: Only one thread for the `kthreadd` process. 
+
+In summary, `ps -eLf` provides a detailed view of processes and their associated threads.
+
+## set limits 
+```sh
+ulimit -a: View all resource limits.
+ulimit -n <value>: Set max open files limit.
+ulimit -s <value>: Set stack size limit.
+ulimit can be used to monitor and control the resource usage for processes.
+```
+- Persistent changes:
+To make changes persistent across reboots, you would need to edit system configuration files like /etc/security/limits.conf (for user limits) or use sysctl for kernel-level limits This file sets the resource limits for the users logged in via PAM. It does not affect resource limits of the system services.
+
 Certainly! Here are some common Linux commands used by senior admins, along with their most popular flags and quick descriptions:
 
 ### 1. **`du` (Disk Usage)**
