@@ -356,6 +356,48 @@ Each partition can have its own filesystem (e.g., ext4, NTFS) and hold different
 
 ------
 
+# LVM
+> LVM (Logical Volume Manager) is a flexible storage management system in Linux that allows you to create, resize, and manage logical volumes (LVs) from physical volumes (PVs) within volume groups (VGs), enabling easier disk management and dynamic storage allocation without needing to repartition disks.
+The error "Cannot use /dev/sdb: device is partitioned" occurs because LVM requires an unpartitioned device (i.e., a whole disk or a new partition) to initialize as a physical volume (PV). If the device is already partitioned (e.g., /dev/sdb is partitioned into /dev/sdb1, /dev/sdb2, etc.), LVM cannot use the entire device directly without removing the partition table.
+
+- Solution:
+You can either use a partition on the disk (e.g., /dev/sdb1) as the physical volume or wipe the partition table and use the entire disk.
+
+Here are the steps to create and use LVM (needs sudo)
+
+1. **Create Physical Volume (PV)**:
+   ```bash
+   pvcreate /dev/sdb
+   ```
+
+2. **Create Volume Group (VG)**:
+   ```bash
+   vgcreate vg_data /dev/sdb
+   ```
+
+3. **Create Logical Volume (LV)**:
+   ```bash
+   lvcreate -L 10G -n lv_data vg_data
+   ```
+
+4. **Create Filesystem on LV**:
+   ```bash
+   mkfs.ext4 /dev/vg_data/lv_data
+   ```
+
+5. **Mount the LV**:
+   ```bash
+   mount /dev/vg_data/lv_data /mnt/data
+   ```
+
+6. **Configure for Auto-mount**:
+   Add to `/etc/fstab`:
+   ```bash
+   /dev/vg_data/lv_data  /mnt/data  ext4  defaults  0  2
+   ```
+
+----
+
 ![image](https://github.com/user-attachments/assets/73bfc4bb-3ab6-4833-939d-c24051e89b69)
 
 ![image](https://github.com/user-attachments/assets/c9935fbd-50bc-4151-abd6-787232f4ff3a)
