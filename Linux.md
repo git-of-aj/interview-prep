@@ -373,6 +373,113 @@ swap space is a space on the hard disk used when the RAM or physical memory amou
 4. Completed/Terminated: The process has been terminated by the operating system or finished the execution.
 5. Zombie: The process is aborted, but information related to the process is still available and is available within the process table
 
+### can't login - ssh key lost
+If you've lost your SSH key for an AWS EC2 instance and cannot log in, there are a few ways to recover access. Here’s a step-by-step guide to regain access to your EC2 instance on AWS:
+
+### Option 1: **Use EC2 Instance Connect (for Amazon Linux 2 or Ubuntu instances)**
+
+If your EC2 instance is running Amazon Linux 2 or Ubuntu, and if EC2 Instance Connect is configured, you can connect to your instance via the AWS Management Console without the need for an SSH key.
+
+1. Go to the **EC2 Dashboard** in the AWS Management Console.
+2. Select your EC2 instance.
+3. Click on the **Connect** button at the top of the page.
+4. In the **EC2 Instance Connect** tab, click on **Connect**. This will open a web-based SSH session in your browser.
+5. Once logged in, you can add a new SSH key to your instance or fix the `~/.ssh/authorized_keys` file.
+
+   For example, you can add your new public key:
+   ```bash
+   echo "your-new-public-key" >> ~/.ssh/authorized_keys
+   ```
+
+6. After adding your key, you should be able to log in with the new key using SSH.
+
+---
+
+### Option 2: **Access via EC2 Instance's Root Volume (Elastic Block Store - EBS)**
+
+If EC2 Instance Connect is not available or not configured, you can use this method to recover access by attaching the root volume to another instance.
+
+#### Steps:
+1. **Stop your EC2 instance** (do not terminate it, just stop it).
+   - Go to the **EC2 Dashboard**.
+   - Select your instance and choose **Actions > Instance State > Stop**.
+
+2. **Detach the Root Volume** from the affected instance:
+   - In the **EC2 Dashboard**, go to **Volumes** under **Elastic Block Store (EBS)**.
+   - Find the root volume of the stopped EC2 instance (it's typically named `/dev/xvda` or `/dev/sda1`).
+   - Select it and click **Actions > Detach Volume**.
+
+3. **Attach the Volume to Another EC2 Instance**:
+   - Choose an EC2 instance that has SSH access (one that you can log into).
+   - In the **Volumes** section, select the detached volume and click **Actions > Attach Volume**.
+   - Attach the volume to a device name (e.g., `/dev/sdf`).
+
+4. **Log in to the Instance** to which the volume was attached:
+   - SSH into this instance.
+
+5. **Mount the Detached Volume**:
+   - Find the new volume by running `lsblk` to identify the device (e.g., `/dev/xvdf` or `/dev/sdf`).
+   - Mount the volume to access the file system:
+     ```bash
+     sudo mkdir /mnt/temp
+     sudo mount /dev/xvdf1 /mnt/temp
+     ```
+
+6. **Add the New SSH Key**:
+   - Navigate to the `.ssh/authorized_keys` file of the root or user directory of the mounted volume:
+     ```bash
+     sudo nano /mnt/temp/home/ec2-user/.ssh/authorized_keys
+     ```
+     (Use the appropriate username, e.g., `ec2-user` or `ubuntu`, depending on the instance’s OS).
+   - Add your new public SSH key to this file.
+
+7. **Unmount and Detach the Volume**:
+   - Once the key is added, unmount the volume:
+     ```bash
+     sudo umount /mnt/temp
+     ```
+   - Detach the volume from this instance in the AWS Console (Actions > Detach Volume).
+
+8. **Reattach the Volume to the Original EC2 Instance**:
+   - In the **EC2 Dashboard**, go to **Volumes** and select the volume.
+   - Click **Actions > Attach Volume**, then reattach it to the original EC2 instance.
+   - Ensure it’s attached as `/dev/xvda` or `/dev/sda1`.
+
+9. **Start the Original EC2 Instance**:
+   - Go back to the **Instances** page, select your instance, and start it.
+   
+10. **Log in Using Your New SSH Key**:
+    - You should now be able to SSH into the instance using your new key:
+      ```bash
+      ssh -i /path/to/your/new-key.pem ec2-user@your-ec2-ip
+      ```
+
+---
+
+### Option 3: **Create a New Key Pair and Use EC2 Instance Recovery (for Newer EC2 Instances)**
+
+If you don't have another instance to use for attaching the volume, you can use EC2 Instance Recovery by creating a new key pair, and then using **Session Manager** (if configured) or another recovery tool like EC2 Serial Console.
+
+1. **Create a New Key Pair**:
+   - In the AWS Management Console, go to **EC2 > Key Pairs** and create a new key pair.
+   
+2. **Use EC2 Instance Recovery (via Systems Manager)**:
+   - If **AWS Systems Manager** is enabled on your EC2 instance, you can use **Session Manager** to connect to your instance without needing an SSH key.
+   - In the EC2 Dashboard, select your instance, click **Connect**, and choose the **Session Manager** tab to open a browser-based shell.
+
+3. **Update the Instance with New SSH Key**:
+   - After connecting via Session Manager or EC2 Serial Console, add your new SSH key to the `~/.ssh/authorized_keys` file on the instance.
+
+---
+
+### Conclusion
+The most common recovery options for lost SSH keys in AWS EC2 instances are:
+- Using EC2 Instance Connect (if available).
+- Attaching the root volume to another instance to modify the `authorized_keys` file.
+- Leveraging Systems Manager if configured.
+
+If none of these work for you, feel free to ask for more guidance on specific steps based on your setup!
+
 
 
 
