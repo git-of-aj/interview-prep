@@ -21,6 +21,10 @@ Thread:
   |--> Easier to communicate within process
 ```
 
+## hard link vs symbolic
+**Hard links** point to the same inode and share the same data blocks, allowing multiple filenames for one file. **Symbolic links** (symlinks) are shortcuts to another file, storing the target's path, and can link across filesystems. Both types reference the inode structure, which stores file metadata.
+
+## PS
 The command `ps -eLf` shows detailed information about processes and threads in Linux. Here's an explanation of the output:
 
 ### Columns:
@@ -68,7 +72,77 @@ Certainly! Here are some common Linux commands used by senior admins, along with
    - `-c` — Show a grand total
 
    **Example**: `du -sh /var/log`
+## IP a
+The `ip a` output shows network interfaces and their details:
 
+1. **lo (Loopback Interface)**:
+   - **IP**: 127.0.0.1 (IPv4) and ::1 (IPv6).
+   - **Status**: UP, used for internal communication.
+
+2. **eth0 (Ethernet Interface)**:
+   - **IP**: 10.0.0.4/24 (IPv4) and fe80::222:48ff:fe6e:8ade/64 (IPv6).
+   - **Status**: UP, connected to a network.
+
+## Traceroute 8.8.8.8
+> The output of traceroute showing * * * for each hop means that the traceroute request timed out or the response was not received within the expected time. possibly due to firewall rules or network configurations.
+Firewalls or network security devices may be blocking ICMP Echo Requests (used by traceroute) or not responding to them. This is common in corporate networks, data centers, or even on the internet.
+## STAT
+In Linux, files have three types of timestamps: **atime**, **mtime**, and **ctime**. These represent different aspects of file access and modification.
+
+### 1. **atime (Access Time)**:
+- **Definition**: The last time a file was accessed (read).
+- **Changed when**: You read a file, for example using `cat`, `less`, or `open` in a program.
+- **Command to view**: 
+  ```bash
+  stat filename
+  ```
+  Example output:
+  ```
+  Access: 2025-01-15 09:35:22.000000000 -0500
+  ```
+
+### 2. **mtime (Modification Time)**:
+- **Definition**: The last time the content of the file was modified.
+- **Changed when**: You edit a file (e.g., using `vi`, `nano`, `echo`).
+- **Command to view**: 
+  ```bash
+  stat filename
+  ```
+  Example output:
+  ```
+  Modify: 2025-01-15 09:10:01.000000000 -0500
+  ```
+
+### 3. **ctime (Change Time)**:
+- **Definition**: The last time the file's metadata or content was changed (e.g., permission changes, ownership change, or content modification).
+- **Changed when**: You change file permissions with `chmod`, change ownership with `chown`, or modify the file.
+- **Command to view**:
+  ```bash
+  stat filename
+  ```
+  Example output:
+  ```
+  Change: 2025-01-15 09:20:15.000000000 -0500
+  ```
+
+### Key Commands:
+
+- **`stat filename`**: Shows all three timestamps (atime, mtime, ctime).
+- **`touch filename`**: Updates both `atime` and `mtime` to the current time. If the file doesn't exist, it creates an empty file.
+  ```bash
+  touch filename
+  ```
+- **`date`**: Displays the current system time, useful for comparison.
+  ```bash
+  date
+  ```
+
+### Summary of Differences:
+- **atime**: Last access (read) time.
+- **mtime**: Last modification (content change) time.
+- **ctime**: Last change (metadata or content change) time.
+
+By understanding these timestamps, you can better track file access and changes in your system, which is helpful for auditing and troubleshooting.
 ---
 
 ### 2. **`df` (Disk Free Space)**
@@ -256,6 +330,45 @@ Certainly! Here are some common Linux commands used by senior admins, along with
    - `-d <line_number>` — Delete a specific line from history
 
    **Example**: `history -c`
+
+Here’s a brief explanation of each command:
+
+1. **`whoami`**: Displays the current logged-in user's username.
+   ```bash
+   whoami
+   ```
+
+2. **`who am i`**: Displays the current user’s login session details, including the terminal and IP address.
+   ```bash
+   who am i
+   ```
+
+3. **`who`**: Shows information about users currently logged into the system, including their terminal, login time, and IP.
+   ```bash
+   who
+   ```
+
+4. **`id`**: Displays the user ID (UID), group ID (GID), and groups the user belongs to.
+   ```bash
+   id
+   ```
+
+5. **`w`**: Shows who is logged in and their activity (e.g., idle time, processes being run).
+   ```bash
+   w
+   ```
+
+6. **`uptime`**: Displays how long the system has been running, along with the current time, load averages, and number of users.
+   ```bash
+   uptime
+   ```
+
+7. **`last`**: Shows the list of recent logins, reboots, and shutdowns.
+   ```bash
+   last
+   ```
+
+These commands are helpful for monitoring users, system uptime, and login activity.
 
 ---
 
