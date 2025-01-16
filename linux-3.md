@@ -44,3 +44,7 @@ The line `/swapfile none swap sw 0 0` added to the `/etc/fstab` file is used to 
 - `0 0`: No backup or file system check is needed for swap files.
 
 By adding this line to `/etc/fstab`, the swap file will be automatically enabled every time your system boots, ensuring that swap space is available without needing manual intervention after each reboot.
+
+## find
+sudo find /etc -name my.cnf
+
