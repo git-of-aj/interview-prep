@@ -1,3 +1,4 @@
+[Goat - HOW SSL WORKS](https://youtu.be/0yw-z6f7Mb4?feature=shared)
 ## Symmetric 
 - Plaintext: The original message you want to protect.
 - Cipher: The algorithm used to encrypt the plaintext (e.g., AES).
