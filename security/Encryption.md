@@ -100,3 +100,6 @@ decrypted_message = unpad(decipher.decrypt(encrypted_message), AES.block_size)
 # Step 7: Show the original message after unlocking (decrypting)
 print(f"Decrypted message: {decrypted_message.decode()}")
 ```
+## Asymmetric
+- Public key: encryption
+- private key : decryption
