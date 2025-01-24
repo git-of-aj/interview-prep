@@ -42,3 +42,5 @@ files and folders in container `base image`:
 
     Control groups (cgroups): Docker containers use cgroups to limit and control the amount of resources, such as CPU, memory, and I/O, that a container can access.
 ```
+- System calls are the mechanism through which a program (like a Docker container) interacts with the operating system’s kernel to request resources like CPU time, memory, file access, etc.
+- Control groups, or cgroups, allow Docker (and the host system) to limit, prioritize, and monitor the resource usage (like CPU, memory, and disk I/O) of containers. This is useful for ensuring that no single container consumes too many resources.
