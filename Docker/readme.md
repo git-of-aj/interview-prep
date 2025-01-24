@@ -1,3 +1,4 @@
+> The Open Container Initiative is an open governance structure for the express purpose of creating open industry standards around container formats and runtimes.
 ## What is a container ?
 > Docker is a platform to build, ship and run distributed applications – meaning that it runs applications in a distributed fashion across many machines, often with a variety of hardware and OS configurations
 A container is a standard unit of software that packages up code and all its dependencies so the application runs quickly and reliably from one computing environment to another. A Docker container image is a lightweight, standalone, executable package of software that includes everything needed to run an application: code, runtime, system tools, system libraries and settings.
