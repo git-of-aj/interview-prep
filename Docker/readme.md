@@ -1,4 +1,4 @@
-What is a container ?
+## What is a container ?
 A container is a standard unit of software that packages up code and all its dependencies so the application runs quickly and reliably from one computing environment to another. A Docker container image is a lightweight, standalone, executable package of software that includes everything needed to run an application: code, runtime, system tools, system libraries and settings.
 > A container is a bundle of Application, Application libraries required to run your application and the minimum system dependencies.
 ```
@@ -44,3 +44,6 @@ files and folders in container `base image`:
 ```
 - System calls are the mechanism through which a program (like a Docker container) interacts with the operating system’s kernel to request resources like CPU time, memory, file access, etc.
 - Control groups, or cgroups, allow Docker (and the host system) to limit, prioritize, and monitor the resource usage (like CPU, memory, and disk I/O) of containers. This is useful for ensuring that no single container consumes too many resources.
+
+## Docker - infrastructure plumbing
+- To build Docker we have re-used large quantities of plumbing: Linux, Go, lxc, aufs, lvm, iptables, virtualbox, vxlan, mesos, etcd, consul, systemd… the list goes on.
