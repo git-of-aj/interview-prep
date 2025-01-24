@@ -47,3 +47,21 @@ files and folders in container `base image`:
 
 ## Docker - infrastructure plumbing
 - To build Docker we have re-used large quantities of plumbing: Linux, Go, lxc, aufs, lvm, iptables, virtualbox, vxlan, mesos, etcd, consul, systemd… the list goes on.
+
+## distributed vs Microservices
+- A distributed system is a general term for any system where components are spread out across multiple machines or locations.
+- Microservices is a specific architectural approach where an application is broken down into small, independent services, often running in a distributed system.
+
+### **Comparison**: Distributed Systems vs. Microservices
+
+| Feature               | **Distributed Systems**                         | **Microservices**                          |
+|-----------------------|-------------------------------------------------|--------------------------------------------|
+| **Scope**             | Encompasses any system where components are spread across machines or locations. | A specific approach to building applications where they are split into small, independent services. |
+| **Purpose**           | Aims to enable multiple systems or machines to work together seamlessly. | Aims to split large applications into smaller, manageable services focused on business capabilities. |
+| **Communication**     | Components interact via network protocols (e.g., HTTP, RPC). | Microservices interact via APIs or messaging (REST, gRPC, Kafka). |
+| **Decentralization**  | A distributed system can be centralized or decentralized. | Microservices are inherently decentralized. Each service manages its own data and logic. |
+| **Fault Tolerance**   | Provides fault tolerance through replication, redundancy, and data distribution. | Fault tolerance is inherent in microservices design—failure of one service doesn't affect the others. |
+| **Scalability**       | Typically scalable by adding more nodes or machines. | Microservices scale by deploying more instances of individual services. |
+| **Example**           | A distributed database or cloud infrastructure. | A set of services like a payment service, user service, etc., in a web application. |
+
+
