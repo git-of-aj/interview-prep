@@ -41,3 +41,7 @@ This query **finds all courses offered in Spring 2016 that have no student enrol
 2. **`NOT EXISTS (Subquery)` (Current Query)**  
    - Stops checking as soon as a match is found, making it **more efficient** for large datasets.
    - Preferred in cases where `CourseEnrollments` has a **large number of records**.
+## 3
+scan operation reads every data page in the table.  Nope.  It might, but it might not. 
+
+A scan starts at the beginning (or ending) of the (clustered or non-clustered) index and reads 8k pages one at a time FOR AS LONG AS IS NEEDED.  For example, suppose there is a table that stores information about people, and one of the fields is YearOfBirth, and an index is created on that field.   A query with WHERE YearOfBirth < 2000 will start at the first page in the index (with, say, YearOfBirth = 1957) and read every page UNTIL IT READS THE FIRST PAGE WITH A ROW WHERE YearOfBirth is >= 2000: at point, no more pages will be read, because no more rows need to be read.  SQL Server knows that no other page that is so far unscanned can contain a row with YearOfBirth < 2000, so SQL Server stops.
