@@ -15,6 +15,7 @@ its like functions in programming language (define input, output, logic etc)
 
 In summary, while stored procedures without parameters might return similar results to a view, they are more flexible and offer better performance for complex scenarios.
 ### Functions
+> create a function to calculate discount and add its values to a new column in your view/table
 Creates a user-defined function (UDF), which is a Transact-SQL or common language runtime (CLR) routine. A user-defined function accepts parameters, performs an action such as a complex calculation, and returns the result of that action as a value. The return value can either be a scalar (single) value or a table. Use this statement to create a reusable routine that can be used in these ways:
 
 - In Transact-SQL statements such as SELECT
