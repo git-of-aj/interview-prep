@@ -1,6 +1,7 @@
 - [SQL Server live query metrics](https://learn.microsoft.com/en-us/sql/relational-databases/performance/live-query-statistics?view=sql-server-ver16)
 - [SQL Server execution plan](https://learn.microsoft.com/en-us/sql/relational-databases/performance/display-an-actual-execution-plan?view=sql-server-ver16)
 - [SQL Server security](https://learn.microsoft.com/en-us/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver16)
+- [SQL Server - Index](https://hasura.io/learn/database/microsoft-sql-server/indexes/)
 ### [views](https://learn.microsoft.com/en-us/sql/relational-databases/views/views?view=sql-server-ver16)
 - A view is a virtual table whose contents are fed into it by `your query`. The rows and columns of data come from tables referenced in the query
 - Just like a Normal table, it has rows & columns.
