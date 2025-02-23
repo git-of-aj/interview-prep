@@ -22,3 +22,7 @@ The amount of resources available to the pool is controlled by your budget. All 
 - Optionally set the minimum and maximum resources for the databases, in either DTU or vCore purchasing model.
 - Set the resources of the pool based on your budget.
 > When you move databases into or out of an elastic pool, there's no downtime except for a brief period (on the order of seconds) when database connections are dropped at the end of the operation.
+## Azure data Sync
+- [SQL Data Sync retirement: Migrate to alternative solutions](https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-data-sync-retirement-migration?view=azuresql)
+SQL Data Sync is a service built on Azure SQL Database that lets you synchronize the data you select bi-directionally across multiple databases, both on-premises and in the cloud.
+Azure SQL Data Sync does not support Azure SQL Managed Instance or Azure Synapse Analytics.
