@@ -8,7 +8,15 @@ i would say they are similar but not the same, lemme say you why
 - Azure SQL Managed Instance Iis also a fully managed relational database service, but with a twist. Designed to make the migration of on-premises SQL Server databases super smooth. Gives you more control over instance-level features, mimicking the on-premises SQL Server experience. Ideal for lift-and-shift scenarios where you want a near 100% compatibility with your existing SQL Server apps.
 - so PaaS (automatic patching and version updates, automated backups, high availability) + native daily use SQL Server Features
 # SQL Elastic Pool
+![image](https://github.com/user-attachments/assets/b69187a7-ecb7-4e6f-b353-8bc2da2d8241)
+
+> ideal example is :
+There are large differences between peak utilization and average utilization per database. ✅
+The peak utilization for each database occurs at different points in time.✅
+eDTUs are shared between many databases
+
 Azure SQL Database elastic pools are a simple, cost-effective solution for managing and scaling multiple databases with varying and unpredictable usage demands
+
 The amount of resources available to the pool is controlled by your budget. All you have to do is:
 - Add databases to the pool.
 - Optionally set the minimum and maximum resources for the databases, in either DTU or vCore purchasing model.
