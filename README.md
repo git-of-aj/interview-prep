@@ -2,6 +2,9 @@
 
 [must check linux questiions](https://zerotomastery.io/blog/linux-interview-questions/)
 
+> If your SQL Server and client are on a private network and you trust the network, you don’t need a public CA-issued certificate.
+> you'll need to configure the client machines to explicitly trust the certificate (i.e., add the certificate to their trusted root store).
+> use internal CA Active Directory Certificate Services (ADCS) in Windows Server), you can issue certificates from this internal CA to both the SQL Server and clients.
 # TLS - sits b/w layer 7 & 4 -- highest version preferred
 > Starting with SQL Server 2016 (13.x), Secure Sockets Layer (SSL) has been discontinued.
 - TLS/SSL protocols use algorithms from a cipher suite to create keys and encrypt information
