@@ -12,3 +12,4 @@ Digital certificates provide the following services:
 
 1. Encryption: They help protect the data that's exchanged from theft or tampering.
 2. Authentication: They verify that their holders (people, web sites, and even network devices such as routers) are truly who or what they claim to be. Typically, the authentication is one-way, where the source verifies the identity of the target, but mutual TLS authentication is also possible.
+>  most typical SQL Server connections using TLS, the `client` uses the **server's public key** to establish a secure connection, and the server uses its private key to decrypt and respond.
