@@ -1,3 +1,7 @@
+# Connect App Service to SQL DB
+- [Use managed identity](https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp)
+- The back-end services for managed identities maintain a cache per resource URI for around 24 hours. This means that it can take several hours for changes to a managed identity's group or role membership to take effect. Today, it is not possible to force a managed identity's token to be refreshed before its expiry.
+- [For azure arc VM use app registraions add certs](https://learn.microsoft.com/en-us/sql/relational-databases/security/authentication-access/azure-ad-authentication-sql-server-setup-tutorial?view=sql-server-ver16)
 # azure sql vs azure managed instances
 ![image](https://github.com/user-attachments/assets/eb973c3e-e1c4-4358-a0de-fb251a2fb655)
 
