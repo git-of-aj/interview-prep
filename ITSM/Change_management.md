@@ -219,5 +219,50 @@ Linking at least one WO to each CR ensures:
 
 
 
+---
+
+### 🔹 **Key Points: Handling EC2 Requests via ITIL/ITSM**
+
+#### ✅ **Formal Logging is Required**
+
+* All EC2 requests **must be logged** in the ITSM tool as a **Service Request or Work Order (WO)**.
+* Logging should be done by:
+
+  * The **client via self-service portal or email**.
+  * Or the **IT helpdesk/service desk** on the client’s behalf.
+
+#### 🔒 **Why You Should Not Act on Informal Requests**
+
+* Acting on MS Teams or email requests **bypasses formal processes**.
+* Risks include:
+
+  * **No audit trail**
+  * **Untracked SLAs**
+  * **Missed documentation**
+  * **Reduced visibility and accountability**
+
+#### 🛠️ **Your Role as a Technician**
+
+* **Do not create the WO yourself** in response to informal messages.
+* **Only act on formally assigned WOs** through the ITSM system.
+
+#### 📝 **Recommended Actions**
+
+* **Ask the client to submit the request** via the ITSM portal or helpdesk.
+* Alternatively, **forward the request to the service desk** and ask them to log and assign it properly.
+
+#### 🎯 **Why It Matters**
+
+* Ensures **SLA adherence**, **audit readiness**, and **clear ownership**.
+* Aligns with ITIL’s **Request Fulfilment** and **Service Request Management** processes.
+* Promotes **structured, compliant, and transparent service delivery**.
+
+---
+
+
+
+
+
+
 
 
