@@ -5,6 +5,21 @@
 
 ---
 
+---
+
+### **Key ITIL/ITSM Terms and Roles**
+
+| **Term/Role**   | **Description**                                                                                                                                   |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SMO**         | *Service Management Office*: Governs and improves ITSM practices; ensures process excellence and alignment with business goals.                   |
+| **RCA**         | *Root Cause Analysis*: Post-incident investigation to determine the underlying cause; typically handled by Problem Management or technical teams. |
+| **P1 Incident** | *Priority 1 Incident*: High-priority, high-impact issue requiring urgent response (e.g., production outage, critical service down).               |
+
+---
+
+Let me know if you’d like to add more terms or have this formatted for training materials or documentation.
+
+
 ### 🔹 **Key Definitions**
 
 | Term               | Meaning                                                                  |
@@ -186,6 +201,15 @@ Here’s a **concise summary and key points** from your detailed input on the **
 | Neutral, process-driven role  | Domain-specific technical expertise    |
 
 ---
+
+
+### ✅ **Incident Manager vs. Tower Lead – Summary (ITIL/ITSM Best Practice)**
+
+* **The Incident Manager** is a **dedicated, process-focused** role responsible for coordinating the entire incident lifecycle.
+* This role is **appointed according to ITSM processes**, typically from the **Service Management Office (SMO)** or central ITSM team.
+* **Tower Leads** (e.g., Cloud, Network, Application) provide **technical support and resolution**, but they **do not own or manage** the incident process.
+* This **separation of responsibilities** ensures an **unbiased, structured, and efficient** response during high-impact incidents—aligning with ITIL/ITSM best practices.
+
 
 
 
