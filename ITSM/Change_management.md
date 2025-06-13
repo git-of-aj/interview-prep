@@ -39,6 +39,59 @@
 
 ---
 
+---
+
+### 🔹 **Minor Change – Key Points**
+
+* **Definition:** Low-risk, low-impact, non-trivial but not routine.
+* **Examples:** Minor config tweaks, small software updates, documentation updates.
+* **Process:**
+
+  * Requires a **Request for Change (RFC)**.
+  * Approved by **Change Manager** or **simplified CAB process**.
+  * **Fully documented** for reference.
+
+---
+
+### 🔹 **Major Change – Key Points**
+
+* **Definition:** High-risk, high-impact, potentially business-disruptive.
+* **Examples:** ERP implementations, data center relocations, major cloud migrations.
+* **Process:**
+
+  * Requires **detailed RFC** with **risk, impact, and financial analysis**.
+  * Approved by **CAB and/or senior management**.
+  * Includes **thorough planning and stakeholder communication**.
+
+---
+
+### 🔹 **General Guidelines**
+
+* **Risk, impact, and complexity** are the key criteria for classification.
+* **Minor ≠ trivial** — minor changes are still meaningful but don’t require extensive oversight.
+* Organizations should **define their own thresholds and examples** to ensure consistency.
+
+---
+
+### 🔹 **Other Categories for Context**
+
+* **Standard Change:** Pre-approved, routine, low risk (e.g., patching).
+* **Emergency Change:** Urgent, unplanned, high risk (e.g., critical vulnerability fix).
+
+---
+
+### ✅ **Quick Reference Table**
+
+| **Change Type** | **Risk/Impact** | **Examples**                          | **Approval**            |
+| --------------- | --------------- | ------------------------------------- | ----------------------- |
+| Minor           | Low             | Config tweaks, minor software changes | Change Manager / CAB    |
+| Major           | High            | ERP rollout, infra overhaul           | CAB / Senior Management |
+
+---
+
+
+---
+
 ## The ITIL Change Management Process
 
 The process is structured into several stages, each serving a specific purpose to ensure changes are managed effectively[4][5][6][9]:
@@ -104,3 +157,67 @@ The process is structured into several stages, each serving a specific purpose t
 - Communicate effectively with change managers and CAB members.
 
 ---
+
+
+---
+
+### 🔹 **What Is a Work Order (WO)?**
+
+* A **Work Order** is a formal record of specific tasks required to carry out part or all of a Change Request (CR).
+* Breaks down complex changes into **actionable, trackable tasks**.
+* Assigns **ownership and responsibility** for execution.
+
+---
+
+### 🔹 **Why Link a WO to Every CR?**
+
+Linking at least one WO to each CR ensures:
+
+* ✅ **Task Assignment:** Specifies who does what and when.
+* ✅ **Accountability & Progress Tracking:** Monitors task status and completion.
+* ✅ **Audit Trail:** Maintains records for compliance and review.
+* ✅ **Team Coordination:** Supports complex changes by dividing work across teams.
+
+---
+
+### 🔹 **Do You Update Both CR and WO?**
+
+**Yes – both are actively updated:**
+
+| Item                    | Tracks                                            | Updated By              |
+| ----------------------- | ------------------------------------------------- | ----------------------- |
+| **Change Request (CR)** | Overall change lifecycle, approvals, and outcomes | Change Manager/Owner    |
+| **Work Order (WO)**     | Task-level progress and execution details         | Assigned Techs or Teams |
+
+> When all WOs are completed, the CR can typically move toward closure.
+
+---
+
+### 🔹 **WO vs. CR: SLA Differences**
+
+| Component      | SLA Applicable? | Why?                                                                        |
+| -------------- | --------------- | --------------------------------------------------------------------------- |
+| **Work Order** | ✅ Yes           | WOs are measurable, customer-facing service tasks with deadlines.           |
+| **CR Tasks**   | ❌ No            | CR tasks are internal process steps without standalone service commitments. |
+
+---
+
+### ✅ **Key Takeaways**
+
+* **Every CR should have at least one WO** for clarity, tracking, and accountability.
+* **WOs support SLAs** to ensure tasks are timely and measurable.
+* **CRs manage change holistically**, while **WOs drive execution**.
+
+---
+
+
+### 📋 Summary Table – Work Order Example
+
+| **WO Example (Cloud Support Engineer)**    | **Tasks within the WO/CR**                                                                                                 |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Provision a new AWS EC2 server for Finance | - Configure security groups  <br> - Launch instance <br> - Install software <br> - Set up monitoring <br> - Document setup |
+
+
+
+
+
