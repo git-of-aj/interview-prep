@@ -36,5 +36,49 @@ Understanding these helps in troubleshooting system issues.
 
 ## Process Priority and Scheduling
 - Linux assigns priority to processes so critical tasks get CPU time first.
+- renice
+
+## kill
+- `kill PID (sends SIGTERM)`
+
+This sends signal 15 (SIGTERM).
+
+Think of it as saying:
+
+"Please shut down cleanly."
+
+The process gets a chance to:
+
+- Save data
+- Close files
+- Finish the current request
+- Release locks
+- Close network connections
+- Clean up resources
+> A well-written application will do above shitty code gives no shit ......
+`kill -9 PID (sends SIGKILL)`
+
+This sends signal 9 (SIGKILL).
+
+Think of it as:
+
+"Stop immediately. You have no choice."
+
+The kernel immediately removes the process from the scheduler and frees its resources. The process cannot:
+
+Save files
+Run cleanup code
+Close database connections gracefully
+Ignore or handle the signal
+
+Use kill -9 PID
+
+Only when:
+
+- The process ignores SIGTERM
+- The process is hung
+- The process is consuming excessive CPU and won't respond
+- You're certain graceful shutdown isn't working
 - Processes with higher priority receive more CPU time, while lower-priority processes run when resources are available.
 - This ensures smooth system performance even when multiple programs run simultaneously.
+ 
