@@ -107,6 +107,15 @@ In Linux, files have three types of timestamps: **atime**, **mtime**, and **ctim
 - **Command to view**: 
   ```bash
   stat filename
+  ananay [ ~ ]$ stat .bash_profile
+  File: .bash_profile
+  Size: 645             Blocks: 8          IO Block: 4096   regular file
+Device: 0,80    Inode: 3014708     Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 9527/  ananay)   Gid: ( 9527/  ananay)
+Access: 1970-01-01 00:00:00.000000000 +0000
+Modify: 2024-08-24 02:06:54.000000000 +0000
+Change: 2026-07-01 13:32:47.560877062 +0000
+ Birth: 2026-07-01 13:32:47.498877535 +0000
   ```
   Example output:
   ```
@@ -373,3 +382,119 @@ These commands are helpful for monitoring users, system uptime, and login activi
 ---
 
 These commands and flags are frequently used by system administrators to manage and troubleshoot Linux servers in production environments.
+
+### Hints you are inside a Kubernetes container:
+Here’s a **tight, high-signal cheatsheet** based on what actually *credibly indicates Kubernetes vs container vs host*:
+
+---
+
+### Command:
+
+```bash
+cat /proc/1/cmdline
+```
+
+If output looks like:
+
+```
+/pause
+```
+
+Means it’s Kubernetes-like sandbox (pause container as PID 1)
+→ Suggests a **Kubernetes pod or Kubernetes-derived sandbox runtime**
+
+---
+
+### Command:
+
+```bash
+cat /proc/1/cgroup
+```
+
+If output contains:
+
+```
+.../containers/<long-hash>
+```
+
+Means it’s a containerized workload with runtime-managed cgroups
+→ Suggests **containerd/Kubernetes-style container isolation (not bare metal OS)**
+
+---
+
+### Command:
+
+```bash
+cat /var/run/secrets/kubernetes.io/serviceaccount/token
+```
+
+If file exists and readable:
+→ Strong confirmation of **Kubernetes pod identity with service account mounted**
+
+---
+
+### Command:
+
+```bash
+env | grep KUBERNETES
+```
+
+If output contains:
+
+```
+KUBERNETES_SERVICE_HOST=...
+```
+
+→ Strong indicator of **running inside Kubernetes cluster with injected env vars**
+
+---
+
+### Command:
+
+```bash
+cat /etc/hostname
+```
+
+If output looks like:
+
+```
+<random-pod-name> or <hash-like name>
+```
+
+→ Suggests **ephemeral container/pod identity (common in Kubernetes)**
+
+---
+
+### Command:
+
+```bash
+cat /proc/self/mountinfo
+```
+
+If output contains:
+
+```
+overlay + /run/gcs/... or docker/overlay2/
+```
+
+→ Indicates **container filesystem (Kubernetes/Docker/runtime sandbox), not a full OS**
+
+---
+
+### Command:
+
+```bash
+ps -p 1 -o comm=
+```
+
+If output is:
+
+```
+systemd → normal Linux VM/host
+pause → Kubernetes-style sandbox container
+bash/init → minimal container or custom runtime
+```
+
+→ Identifies **init system type (key distinction between VM vs container vs K8s sandbox)**
+
+
