@@ -1,4 +1,5 @@
 ## Tips 
+- Kubernetes version upgrade every `4 months` - [releases](https://kubernetes.io/releases/)
 - [slim vs alpine vs default images in dockerHub](https://forums.docker.com/t/differences-between-standard-docker-images-and-alpine-slim-versions/134973/2). Incase of `Nginx` its dockerhub repo says slim is bare-min package. practically checked:
 ```sh
 REPOSITORY   TAG                      IMAGE ID       CREATED              SIZE
