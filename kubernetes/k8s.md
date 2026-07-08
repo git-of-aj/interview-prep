@@ -107,8 +107,10 @@ The pod network (also called a cluster network) handles communication between po
 - Ingress exposes HTTP and HTTPS routes ONLY from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on the Ingress resource.
 - expose arbitrary ports or protocols uses a service of type Service.Type=NodePort or Service.Type=LoadBalancer.
 ![](https://kubernetes.io/docs/images/ingress.svg)
+
 - Ingress Fan out
 ![](https://kubernetes.io/docs/images/ingressFanOut.svg)
+
 - Name-based virtual hosts
 ![](https://kubernetes.io/docs/images/ingressNameBased.svg)
 
