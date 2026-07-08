@@ -115,6 +115,14 @@ The pod network (also called a cluster network) handles communication between po
 - Name-based virtual hosts
 ![](https://kubernetes.io/docs/images/ingressNameBased.svg)
 
+## Gateway API
+> solves same problem of ext access into K8s like ingress controller
+> But Ingress controller was very simple unable to support rate limiting, URL re-writes, WAF etc
+> You can add annotations to kubernetes Ingress and Service objects to customize their behavior. BUt TOO complicated to manage. [Check this](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/annotations/)
+- GatewayClass is a cluster-scoped resource. | Created BY Platform Engineer | Define once in AKS | Same like Ingress COntroller
+- A Gateway describes how traffic can be translated to Services within the cluster. | By DevOps Engineer or App Admin |
+- HTTPRoute is for multiplexing HTTP or terminated HTTPS connections. |  By DevOps Engineer or App Admin | It’s intended for use in cases where you want to inspect the HTTP stream and use HTTP request data for either routing or modification, for example using HTTP Headers for routing, or modifying them in-flight.
+
 ## Workload Objects
 
 ### 1. Deployments (for stateless application)
