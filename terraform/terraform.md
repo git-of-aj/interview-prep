@@ -1,7 +1,7 @@
 - Blocks are containers for other content and usually represent the configuration of some kind of object
 ## Workflow
 - recommended to use VCS (git) even for individual
-- TF plan is good sanity check but multiple team members To avoid the burden and the security risk of each team member arranging all sensitive inputs locally, just to run tf plan is `bad idea`... so use `CI tools.`
+> TF plan is good sanity check but multiple team members To avoid the burden and the security risk of each team member arranging all sensitive inputs locally, just to run tf plan is `bad idea`... so use `CI tools.`
 - The natural place for these `tf plan output` reviews to occur is alongside pull requests within version control--the point at which an individual proposes a merge from their working branch to the shared team branch.
 - In addition to reviewing the plan for the proper expression of its author's intent, the team can also make an evaluation whether they want this change to happen now. For example, if a team notices that a certain change could result in service disruption, they may decide to delay merging its pull request until they can schedule a maintenance window.
 ### Terraform
