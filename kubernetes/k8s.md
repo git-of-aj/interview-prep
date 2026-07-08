@@ -74,7 +74,25 @@ selector:
   component: redis
 ```
 
+# K8s Networking
+> An overlay network creates a virtual network on top of a physical one. It gives pods hidden, private IP addresses that are separate from the main network.
+>  A flat network assigns every pod an IP address directly from the primary physical or cloud network
+4 kinds:
+1. Highly-coupled `container-to-container` communications: this is solved by Pods and localhost communications.
+2. `Pod-to-Pod` communications: this is the primary focus of this document.
+3. `Pod-to-Service` communications: this is covered by **Services**.
+4. `External-to-Service` communications: this is also covered by **Services**.
+- The network plugin is configured to assign IP addresses to Pods.
+- The kube-apiserver is configured to assign IP addresses to Services.
+- The kubelet or the cloud-controller-manager is configured to assign IP addresses to Nodes.
+![](https://kubernetes.io/docs/images/kubernetes-cluster-network.svg)
 
+#### FOr Pods
+- Each pod in a cluster gets its own unique cluster-wide IP address.
+- Processes running in different containers in the same pod can communicate with each other over localhost
+#### Across Pods
+The pod network (also called a cluster network) handles communication between pods.
+- All pods can communicate with all other pods, whether they are on the same node or on different nodes
 ### Services
 > Services allow your applications to receive traffic. Though each Pod has IP but that's inaccesible from outside
 - A Kubernetes Service is an abstraction layer which defines a logical set of Pods and enables external traffic exposure, load balancing and service discovery for those Pods.
@@ -82,7 +100,17 @@ selector:
 - clusterip : use to expose pods with a permanent internal ip from pool of IP addresses that your cluster has reserved for that purpose. `NOT from VNET`. AKS has `Service CIDR` for this.
 - nodeport (range: 3000 to 32767)  // user > nodeport > port (of service) > targetport (of running container)
 - load balancer: only if using any cloud provider
-- externalnames: 
+- externalnames:
+
+### Ingress
+> The Kubernetes project recommends using Gateway instead of Ingress. The Ingress API has been frozen.
+- Ingress exposes HTTP and HTTPS routes ONLY from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on the Ingress resource.
+- expose arbitrary ports or protocols uses a service of type Service.Type=NodePort or Service.Type=LoadBalancer.
+![](https://kubernetes.io/docs/images/ingress.svg)
+- Ingress Fan out
+![](https://kubernetes.io/docs/images/ingressFanOut.svg)
+- Name-based virtual hosts
+![](https://kubernetes.io/docs/images/ingressNameBased.svg)
 
 ## Workload Objects
 
