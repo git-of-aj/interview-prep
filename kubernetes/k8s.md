@@ -47,7 +47,9 @@ how to write object yaml here: https://kubernetes.io/docs/reference/kubernetes-a
 - Labels are key/value pairs that are attached to objects (like pods, services)
 - labels do not provide uniqueness. In general, we expect many objects to carry the same label(s).
 - Labels can be attached to objects at creation time and subsequently added and modified at any time. 
-- Labels allow for efficient queries and watches and are ideal for use in UIs and CLIs. Non-identifying information should be recorded using annotations
+- Labels allow for efficient queries and watches and are ideal for use in UIs and CLIs. Non-identifying information should be recorded using annotations.
+- `labels are to filter .. like app name, tier, cost center`
+- `annotations are for additional data not used for filtering group of k8s objects like jira ticket number`
 ```yml
 # using label to schedule on node with gpu only
 apiVersion: v1
@@ -84,6 +86,10 @@ selector:
 3. `Pod-to-Service` communications: this is covered by **Services**.
 4. `External-to-Service` communications: this is also covered by **Services**.
 - The network plugin is configured to assign IP addresses to Pods.
+- No Service is required for Pod-to-Pod communication if you already know the destination Pod's IP.
+However, there are practical caveats:
+- Pod IPs are ephemeral. If a Pod is recreated, its IP changes.
+- For stable communication, applications usually connect through a Service, which provides a stable virtual IP and load balances across Pods.
 - The kube-apiserver is configured to assign IP addresses to Services.
 - The kubelet or the cloud-controller-manager is configured to assign IP addresses to Nodes.
 ![](https://kubernetes.io/docs/images/kubernetes-cluster-network.svg)
