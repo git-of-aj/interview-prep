@@ -1,0 +1,7 @@
+- OOPS
+- Pydantic
+- Asyncio
+- Multi-thread/Process
+- UV
+- fastapi
+- pyodbc
