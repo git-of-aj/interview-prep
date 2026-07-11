@@ -7,7 +7,7 @@ context saved in $HOME\.kube\config
 - A Kubernetes context is like a saved connection profile. It tells kubectl three things:
 > Which cluster? Which user? Which namespace?
 ```sh
- kubectl config get-contexts
+kubectl config get-contexts
 CURRENT   NAME           CLUSTER        AUTHINFO                          NAMESPACE
           aks-v1         aks-v1         clusterUser_aks-demo_aks-v1
           az1001demo     az1001demo     clusterUser_az-1001_az1001demo
@@ -15,6 +15,8 @@ CURRENT   NAME           CLUSTER        AUTHINFO                          NAMESP
 *         test           test           clusterUser_DevOps_test
  anana  kubectl config use-context aks-v1
 Switched to context "aks-v1".
+
+kubectl config set-context --current --namespace=nginx-app
 ```
 - `The -A` (or --all-namespaces) | Namespace is cluster scoped object hence `k get ns -A` no benefit.. 
 ```sh
@@ -27,6 +29,24 @@ kubectl api-resources --namespaced=true
 # Not in a namespace
 kubectl api-resources --namespaced=false
 ```
+- get all events `in a namespace`
+```
+kubectl events
+```
+- to see pod image pulling, taint, tolerations, node selection:
+```
+ k describe po learning-app-86f4477754-qpqdv -n learning
+```
+- Just to see Pod IP, age and status
+```
+ k get po -o wide
+```
+- To see pod's running app logs like what nginx is saying, what exception python giving
+```sh
+ k logs podName
+```
+- `kubectl exec -it <pod> -- bash` This works only if: 1. The container is running 2.The image contains a shell (its a distroless image)
+
 
 ## alias
 Powershell:
@@ -73,6 +93,33 @@ NAME                                STATUS   ROLES    AGE   VERSION
 aks-agentpool-25438723-vmss000000   Ready    <none>   28m   v1.34.7
 aks-agentpool-25438723-vmss000001   Ready    <none>   28m   v1.34.7
 ```
+## Kustomize vs Helm
+- Multiple k8s manifests files | No copying YAML files | This pattern is very common with GitOps tools like Argo CD and Flux.
+```sh
+apps/
+|
+├── base/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   └── kustomization.yaml
+│
+└── overlays/
+    |
+    ├── dev/
+    │   └── kustomization.yaml
+    |
+    └── prod/
+        └── kustomization.yaml
+
+# kubectl apply -k overlays/prod or if in pwd => k apply -k ./
+```
+
+- **Helm** shines when you consume software created by others.For example, installing: NGINX Ingress Controller or Prometheus monitoring
+- 
+## AKS Permissions
+- Network Contributor + Contributor (at AKS Managed RG) to `user assigned Managed Identity of AKS` ==> The AKS control plane needs permissions to create Azure resources.This is cluster-level identity. It is NOT normally used by your application pods.
+- **Deprecated** - Microsoft has moved away from AAD Pod Identity. Here each pod was given a identity which was intercepted at Node level to finally get token from azure. The recommended replacement is:
+- `Microsoft Entra Workload Identity`: 
 ## Service Accounts
 - 
 - Namespaced: Each service account is bound to a Kubernetes namespace. Every namespace gets a default ServiceAccount upon creation.
@@ -88,6 +135,8 @@ aks-agentpool-25438723-vmss000001   Ready    <none>   28m   v1.34.7
 
 ```sh
 k auth whoami
+kubectl auth can-i --list
+kubectl config view --minify
 k auth can-i create deployment --as tiffany@ananayojha.rocks
 kubectl get clusterrolebindings
 kubectl get rolebindings -n nginx-app
@@ -251,6 +300,17 @@ then the cluster needs to be **integrated with Microsoft Entra ID**. That's the 
 
 
 ## errors
+```sh
+kubectl get pods -A
+kubectl describe pod <pod> -n <ns>
+kubectl logs <pod> -n <ns>
+kubectl logs <pod> -n <ns> --previous
+kubectl get events -n <ns> --sort-by=.metadata.creationTimestamp
+kubectl get nodes
+kubectl top pods -n <ns>
+kubectl describe deployment <name> -n <ns>
+kubectl get endpoints -n <ns>
+```
 >  kubectl get pods -n dev-node
 NAME                                       READY   STATUS             RESTARTS   AGE
 hellofromnode-deployment-9c4c47895-tjd9p   0/1     ImagePullBackOff   0          95s
