@@ -76,6 +76,180 @@ aks-agentpool-25438723-vmss000001   Ready    <none>   28m   v1.34.7
 ## Service Accounts
 - 
 - Namespaced: Each service account is bound to a Kubernetes namespace. Every namespace gets a default ServiceAccount upon creation.
+> USER ACCOUNT / SERVICE ACCOUNT = WHO AM I? || RBAC ROLE = WHAT CAN I DO? || ROLE BINDING = CONNECTS THE TWO
+- Kubernetes itself does not create OR store user accounts. It trusts an external authentication mechanism (such as client certificates (certs via kubeadm for self managed cluster), cloud IAM, or an identity provider) to establish that someone is david. Once that identity is established, Kubernetes RBAC determines what david can do.
+- local human identity: X.509 Client Certificates (signed by the cluster's CA) and Service Accounts (which act as local accounts for humans or processes)
+![](https://learn.microsoft.com/en-us/azure/aks/media/concepts-identity/aad-integration.png)
+
+- AKS By default has local accounts, `MS recommends to disable it` but noema didn't disabled it in PROD.
+- Once disabled `az aks get-credentials --resource-group <resource-group> --name <cluster-name> --admin` gives error: `Operation failed with status: 'Bad Request'. Details: Getting static credential isn't allowed because this cluster is set to disable local accounts.`
+- But by default: Authentication and Authorization: Local accounts with Kubernetes RBAC && Local accounts: Enabled, in this :
+- `Azure Kubernetes Service RBAC Reader`: Doesn't works if you not using Azure RBAC but `Azure Kubernetes Service Cluster User Role`: `WORKS` ...
+
+```sh
+k auth whoami
+k auth can-i create deployment --as tiffany@ananayojha.rocks
+kubectl get clusterrolebindings
+kubectl get rolebindings -n nginx-app
+```
+-------------------
+### Reason why MS asks to `Disable` Local accounts ....... Once u run az aks get-credentials ..... U get super user access. 
+
+```json
+az aks show \
+  --resource-group DevOps \
+  --name test \
+  --query "{aadProfile:aadProfile,local:disableLocalAccounts}" \
+  -o json
+
+{
+  "aadProfile": null,
+  "local": false
+}
+```
+
+This means:
+
+* **`aadProfile: null`** → **Microsoft Entra ID integration is NOT enabled** on this AKS cluster.
+* **`disableLocalAccounts: false`** (shown as `"local": false` from your query) → **Local account authentication is enabled.**
+
+The `identityProfile` output you shared is **only the managed identity used by the AKS kubelets**. It has nothing to do with how human users authenticate.
+
+## Why your Entra user appears to have full access
+
+Here's the important point:
+
+You said:
+
+> "I granted an Entra ID user Azure Kubernetes Service Cluster User Role."
+
+That Azure role controls **who is allowed to download cluster credentials**. It does **not** magically make the cluster authenticate users with Entra ID.
+
+Because your cluster has:
+
+```text
+aadProfile = null
+```
+
+there is **no Entra authentication configured**.
+
+So when someone runs:
+
+```bash
+az aks get-credentials
+```
+
+AKS returns a **certificate-based kubeconfig**.
+
+That's exactly what you saw:
+
+```yaml
+user:
+  client-certificate-data: ...
+  client-key-data: ...
+```
+
+When Kubernetes receives that certificate, it identifies the caller as:
+
+```text
+Username: masterclient
+Groups: [system:masters]
+```
+
+And `system:masters` is Kubernetes' built-in superuser group.
+
+So the actual flow is:
+
+```text
+Entra User
+      │
+      ▼
+Azure checks:
+"Can this person download kubeconfig?"
+      │
+      ▼
+YES (Cluster User Role)
+      │
+      ▼
+AKS returns certificate credentials
+      │
+      ▼
+Kubernetes sees:
+masterclient
+system:masters
+      │
+      ▼
+Full cluster-admin
+```
+
+Notice that **the Entra username is never presented to Kubernetes**, because the cluster isn't configured to use Entra authentication.
+
+## Why this is different from a modern AKS cluster
+
+On a modern AKS cluster with Entra integration enabled:
+
+```text
+Entra User
+     │
+az login
+     │
+kubelogin
+     │
+OAuth token
+     │
+AKS API Server
+     │
+Username:
+david@contoso.com
+     │
+Kubernetes RBAC
+```
+
+In that scenario:
+
+```yaml
+subjects:
+- kind: User
+  name: david@contoso.com
+```
+
+works exactly as you'd expect.
+
+Your cluster can't do that because `aadProfile` is `null`.
+
+## Can you use Kubernetes RBAC today?
+
+**Not for Entra users.**
+
+Since every downloaded kubeconfig authenticates as `masterclient`, Kubernetes has no way to distinguish:
+
+* Alice
+* Bob
+* David
+
+They all appear as:
+
+```text
+masterclient
+```
+
+Any `RoleBinding` for `david@contoso.com` will never match, because Kubernetes never sees `david@contoso.com` as the authenticated user.
+
+## What should you do?
+
+If your goal is:
+
+* Users sign in with Microsoft Entra ID
+* Kubernetes RBAC controls namespace permissions
+
+then the cluster needs to be **integrated with Microsoft Entra ID**. That's the supported design for AKS. Once enabled, users authenticate as their actual Entra identities and `Role`/`RoleBinding` objects can grant namespace-scoped permissions.
+
+
+
+-----------------
+
+
+
 ## errors
 >  kubectl get pods -n dev-node
 NAME                                       READY   STATUS             RESTARTS   AGE
