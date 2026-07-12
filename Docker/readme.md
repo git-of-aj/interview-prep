@@ -1,3 +1,6 @@
+- vLLM = the application. vLLM is a high-performance inference engine that makes large language models faster, more memory-efficient, and capable of serving many users concurrently, making it well suited for production AI applications.
+- vLLM in Docker = the same application packaged inside a portable box (Docker container) that can run consistently across compatible systems.
+[vLLM is a efficient way to use hardware and run AI agents on Docker](https://medium.com/@juanc.olamendy/deploying-vllm-with-docker-the-complete-guide-to-production-ready-llm-inference-39b812c01535)
 > The Open Container Initiative is an open governance structure for the express purpose of creating open industry standards around container formats and runtimes.
 ## What is a container ?
 > Docker is a platform to build, ship and run distributed applications – meaning that it runs applications in a distributed fashion across many machines, often with a variety of hardware and OS configurations
