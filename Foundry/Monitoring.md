@@ -51,3 +51,54 @@ Build in Eval Tool of MS Foundry :
 - General Purpose Evaluators: Quality evaluation such as coherence and fluency.
 - OpenAI-Based Graders: Use OpenAI graders including string check, text similarity, score-based grading, and label-based grading.
 - Custom Evaluators: Define your own custom evaluators using Python code or LLM-as-a-judge patterns.
+
+## GH Action to Eval Agent
+> Do not run on every commit.. to save cost... example:
+In Azure DevOps:
+```yml
+steps:
+  - task: AIAgentEvaluation@2
+    displayName: "Evaluate AI Agents"
+    inputs:
+      azure-ai-project-endpoint: "$(AzureAIProjectEndpoint)"
+      deployment-name: "$(DeploymentName)"
+      data-path: "$(System.DefaultWorkingDirectory)/path/to/your/dataset.json"
+      agent-ids: "$(AgentIds)"
+```
+GH action: 
+```yml
+name: "AI Agent Evaluation"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  run-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login using Federated Credentials
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run Evaluation
+        uses: microsoft/ai-agent-evals@v3-beta
+        with:
+          # Replace placeholders with values for your Foundry Project
+          azure-ai-project-endpoint: "<your-ai-project-endpoint>"
+          deployment-name: "<your-deployment-name>"
+          agent-ids: "<your-ai-agent-ids>"
+          data-path: ${{ github.workspace }}/path/to/your/data-file
+```
