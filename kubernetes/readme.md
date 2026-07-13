@@ -1,3 +1,4 @@
+## [ConfigMaps and Secret](https://kodekloud.com/blog/day-6-configmaps-and-secrets/)
 ## Pending
 - kubectl debug
 
