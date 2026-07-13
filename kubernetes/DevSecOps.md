@@ -2,6 +2,18 @@
 
 ## DevSecOps
 
+### Trivy
+Trivy supports two targets for container images.
+- Files inside container images
+- Container image metadata
+- Trivy scans the files inside container images for
+
+Vulnerabilities
+Misconfigurations: Trivy mainly supports Infrastructure as Code (IaC) files for misconfigurations.
+Secrets
+Licenses
+
+
 ### Namespace
 
 * Namespace = Logical isolation inside a cluster (similar to a Resource Group concept).
