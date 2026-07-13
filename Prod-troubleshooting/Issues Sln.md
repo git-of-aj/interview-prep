@@ -58,6 +58,11 @@ done < <(az devops project list --query "value[].name" -o tsv)
 ## Permissions get reverted back when user tried add variable in release pipeline
 - check interitance on `i` tab, change permissions there in parent
 
+## Get All PAT Tokens in ADO
+- PAT is now discouraged [Blog](https://devblogs.microsoft.com/devops/reducing-pat-usage-across-azure-devops/)
+[Github Gist with Powershell script that lists all PAT](https://gist.github.com/kickinattech/188f860277ec86634639188fdc80a05c)
+- if `targetAccounts            : ` Empty or Null then its a Global PAT. 
+- Use MS Login Pop Up window to login to Azure Repo instead of Pat - [ms docs](https://learn.microsoft.com/en-us/azure/devops/repos/git/set-up-credential-managers?view=azure-devops)
 ## HTTP2 and NTLM apps broke >> App GW V2 Migration
 [MS DOCS - Windows authentication (NTLM/Kerberos/Negotiate) is not supported with HTTP/2. In this case IIS will fall back to HTTP/1.1.](https://learn.microsoft.com/en-us/iis/get-started/whats-new-in-iis-10/http2-on-iis)
 > Kerberos is the modern, secure default authentication protocol for Active Directory, utilizing tickets for mutual authentication, while NTLM is a legacy, less secure, challenge-response protocol.
