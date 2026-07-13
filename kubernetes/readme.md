@@ -1,4 +1,20 @@
-## [ConfigMaps and Secret](https://kodekloud.com/blog/day-6-configmaps-and-secrets/)
+- Node Affinity constrains which nodes a Pod can be scheduled on based on the labels of the nodes (e.g., placing GPU workloads on specific hardware). Pod Affinity (and Anti-Affinity) constrains where a Pod can be scheduled based on the labels of other Pods already running on those nodes (e.g., keeping microservices together or database replicas apart)
+- Taints (The "Lock"): Applied to nodes via the API to mark them as restricted. A taint consists of a key, value, and effect.Tolerations (The "Key"): Defined in a Pod's YAML file. They match the key, value, and effect of the taint, granting the pod permission to land on a restricted node.
+- Note: While taints and tolerations ensure unsuitable pods do not run on a node, they do not attract pods to that node. To force a specific pod to run on that dedicated node, you should combine taints with Node Affinity or Node Selectors.
+- `kubectl cordon <node-name>`
+
+| Feature                  | `kubectl cordon`                                                        | `kubectl drain`                                                   |
+| ------------------------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **New Pods**             | Blocks scheduling of new pods on the node                               | Blocks scheduling of new pods on the node                         |
+| **Existing Pods**        | Left running normally                                                   | Evicted and rescheduled to other nodes                            |
+| **Primary Use Case**     | Resource troubleshooting, temporary isolation, preventing new workloads | Maintenance, kernel upgrades, node replacement, decommissioning   |
+| **Impact on Workloads**  | No disruption to currently running pods                                 | Running pods are gracefully terminated and moved                  |
+| **Node Status**          | Marked as **Unschedulable**                                             | Marked as **Unschedulable** and workloads are drained             |
+| **Typical Sequence**     | Can be used independently                                               | Usually preceded by `cordon` (performed automatically by `drain`) |
+| **Re-enable Scheduling** | `kubectl uncordon <node>`                                               | `kubectl uncordon <node>` after maintenance is complete           |
+
+- [ConfigMaps and Secret](https://kodekloud.com/blog/day-6-configmaps-and-secrets/)
+
 ## Pending
 - kubectl debug
 
