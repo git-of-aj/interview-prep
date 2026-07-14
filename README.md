@@ -1,3 +1,10 @@
+```sh
+docker images size.....
+python:3.14.6                                      ad904c543b95       1.12GB             0B
+python:3.14.6-alpine3.23                           419898b6a6f1       47.6MB             0B
+python:3.14.6-slim                                 88a1ba8985b8        119MB             0B
+```
+
 # interview-prep - PKI trust model
 
 [must check linux questiions](https://zerotomastery.io/blog/linux-interview-questions/)
