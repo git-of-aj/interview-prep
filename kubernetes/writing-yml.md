@@ -20,3 +20,6 @@ metadata:
     stable: true # <--- This causes the error!
 -------------------- Booleans like true/false or 0/1 in Quotes ---------------------
 ```
+2. The Deployment "api-deployment" is invalid: 
+* spec.template.metadata.labels: Invalid value: {"app":"api","env":"dev"}: `selector` does not match template `labels` ===> Labels should Match
+* spec.selector: Invalid value: {"matchLabels":{"Deployed":"true","app":"api","env":"dev"}}: field is immutable ======> means deploy1 already created now you Can't add new labels to same deployment name, change deployment name. 
