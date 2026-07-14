@@ -1,5 +1,21 @@
 [3rd Party blog Link](https://www.spectrocloud.com/blog/troubleshooting-the-top-10-kubernetes-errors)
+### Networking
+- K8s By default uses its own DNS Server (which is mentioned in AKS Portal): DNS service IP like: 10.0.0.10
+```sh
+ nslookup google.com
+;; Got recursion not available from 10.0.0.10
+;; Got recursion not available from 10.0.0.10
+;; Got recursion not available from 10.0.0.10
+;; Got recursion not available from 10.0.0.10
+Server:         10.0.0.10
+Address:        10.0.0.10#53
 
+Non-authoritative answer:
+Name:   google.com
+Address: 192.178.193.100
+Name:   google.com
+
+```
 ### App logs
 - Multiple pods are running behind a service....... Don't know which pod will recieve traffic so
 ```sh
