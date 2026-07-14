@@ -1,5 +1,10 @@
 [3rd Party blog Link](https://www.spectrocloud.com/blog/troubleshooting-the-top-10-kubernetes-errors)
 
+### App logs
+- Multiple pods are running behind a service....... Don't know which pod will recieve traffic so
+```sh
+kubectl logs -f -l app=my-app
+```
 ### Services
 - If `label`:`value` is not exactly matching with deployment.yml then svc running but no traffic routing to pods
 - To verify: `kubectl get endpointslices`
