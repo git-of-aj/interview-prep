@@ -1,0 +1,84 @@
+trigger:
+  branches:
+    include: [main, hotfix/*]
+    exclude:
+      - prod
+
+pr: none
+
+variables:
+  acrServiceConnection: 'container-registry-P01'
+  containerRegistry: 'crisdbswiftcicdprod01.azurecr.io'
+  imageRepository: 'swiftapi/swiftservice'
+
+jobs:
+- job: DockerBuild
+  displayName: 'Build and Push Docker'
+  pool:
+    vmImage: 'ubuntu-latest'
+  
+  steps:
+  # Checkout
+  - checkout: self
+  
+  # Cache Maven
+  # - task: Cache@2
+  #   displayName: 'Cache Maven packages'
+  #   inputs:
+  #     key: 'maven | "$(Agent.OS)" | **/pom.xml'
+  #     path: $(Pipeline.Workspace)/.m2/repository
+  
+  # Setup Java
+  - task: JavaToolInstaller@0
+    displayName: 'Setup Java 21'
+    inputs:
+      versionSpec: '21'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+  
+  # Login Docker
+  - task: Docker@2
+    displayName: 'Docker login to ACR'
+    inputs:
+      containerRegistry: '$(acrServiceConnection)'
+      command: 'login'
+  # --------- This is not working ---------
+  # Build and Push Docker Image
+  # - task: Maven@4
+  #   displayName: 'Docker Build & Push'
+  #   inputs:
+  #     goals: 'spring-boot:build-image'
+  #     options: '-Pazure-devops -DskipTests -Dmaven.repo.local=$(Pipeline.Workspace)/.m2/repository'
+  #   env:
+  #     BUILD_BUILDID: $(Build.BuildId)
+  #     BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
+  - bash: |
+      mvn clean package
+      ls -ltr target/
+    condition: always()
+    displayName: JAR creation
+  
+  - bash: |
+      docker build -t $(containerRegistry)/swiftapi/swiftservice:latest . 
+      docker image tag $(containerRegistry)/swiftapi/swiftservice:latest $(containerRegistry)/swiftapi/swiftservice:$(Build.BuildId)
+      docker image tag $(containerRegistry)/swiftapi/swiftservice:latest $(containerRegistry)/swiftapi/swiftservice:$(Build.SourceBranchName)
+    #condition: always()
+    displayName: DockerImageCreation
+  - task: Docker@2
+    displayName: 'Push additional tags'
+    inputs:
+      containerRegistry: '$(acrServiceConnection)'
+      repository: '$(imageRepository)'
+      command: 'push'
+      # tags: |
+      #   $(Build.BuildId)
+      #   latest
+      #   $(Build.SourceBranchName)
+      tags: |
+        $(Build.SourceBranchName)
+    condition: succeededOrFailed()
+ 
+  # Cleanup
+  - script: 'docker system prune -f'
+    displayName: 'Cleanup Docker'
+    condition: always()

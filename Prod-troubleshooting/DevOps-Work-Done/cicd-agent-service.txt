@@ -1,0 +1,16 @@
+$sudo cat /etc/systemd/system/cicd-swift.service
+
+[Unit]
+Description=CI/CD Swift Agent Service
+After=network.target
+
+[Service]
+Type=simple
+User=cicdagent
+Group=cicdagent
+ExecStart=/opt/cicd-agent/swift/run.sh
+WorkingDirectory=/opt/cicd-agent/swift
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
