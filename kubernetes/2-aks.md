@@ -143,3 +143,50 @@ command triggers a graceful, zero-downtime rolling restart of your pods. Under t
 1. Set environment variables for a container.
 2. Provide credentials such as SSH keys or passwords to Pods.
 3. Allow the kubelet to pull container images from private registries.
+
+### Service Account
+- A `default` SA is created in every NameSpace.
+> Kubernetes does not separate Users vs SA because RBAC needs two concepts; it separates them because identity creation, credential management, and lifecycle are fundamentally different for people and software.
+| Concern                   | Human User | ServiceAccount |
+| ------------------------- | ---------- | -------------- |
+| Created by Kubernetes     | No         | Yes            |
+| Namespace scoped          | No         | Yes            |
+| Used by Pods              | No         | Yes            |
+| Managed by external IdP   | Usually    | No             |
+| Automatic token lifecycle | External   | Kubernetes     |
+| Interactive login         | Yes        | No             |
+
+##### ServiceAccount token volume projection: Assign a temp JWT token to pod
+- Microsoft Entra Workload ID uses Service Account Token Volume Projection to enable pods to use a Kubernetes identity.
+- Workload ID covers the pod-to-Azure identity scenario in AKS - how applications running in pods authenticate to Microsoft Entra-protected services
+- On AKS automatic, this opetion is pre-configured.
+> The projected ServiceAccount token is not an Azure access token. It's a Kubernetes-issued identity document that proves "this pod is running as ServiceAccount X in namespace Y." Azure Workload Identity uses that proof to obtain a real Azure access token from Microsoft Entra ID. That's why ServiceAccount token projection is the foundation that makes secretless authentication from AKS to Azure resources possible.
+```
+Deployment
+      │
+      ▼
+Uses ServiceAccount "storage-reader"
+      │
+      ▼
+Kubernetes generates a temporary ServiceAccount token
+      │
+      ▼
+The token is projected (placed) into the pod as a file
+      │
+      ▼
+Azure Identity SDK reads the token
+      │
+      ▼
+The SDK sends it to Microsoft Entra ID
+      │
+      ▼
+Entra ID checks:
+"Is this ServiceAccount trusted?"
+      │
+      ▼
+If yes, it issues an Azure access token
+      │
+      ▼
+The pod uses that Azure token to access Azure Storage, Key Vault, or other resources based on the managed identity's RBAC permissions.
+```
+![](https://learn.microsoft.com/en-us/azure/aks/media/workload-identity-overview/workload-id-model.png)
