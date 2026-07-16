@@ -189,4 +189,8 @@ If yes, it issues an Azure access token
       ▼
 The pod uses that Azure token to access Azure Storage, Key Vault, or other resources based on the managed identity's RBAC permissions.
 ```
+[MS DOCS on Managed Identity and Pod permissions](https://learn.microsoft.com/en-us/azure/aks/workload-identity-deploy-cluster?utm_source=chatgpt.com&tabs=new-cluster&pivots=azure-cli#create-a-kubernetes-service-account)
+- AKS needs `User assigned Managed Identity` not system assigned as then every application would inherit the same permissions As 1 system identity => 1 Azure Resource.
+- Use the AKS managed identity (system- or user-assigned) for cluster infrastructure (for example, managing load balancers, disks, or other Azure resources on behalf of Kubernetes).
+- Use Microsoft Entra Workload Identity with user-assigned managed identities for application workloads.
 ![](https://learn.microsoft.com/en-us/azure/aks/media/workload-identity-overview/workload-id-model.png)
