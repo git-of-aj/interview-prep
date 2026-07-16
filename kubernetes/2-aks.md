@@ -133,4 +133,13 @@ command triggers a graceful, zero-downtime rolling restart of your pods. Under t
   kubectl rollout restart deployment --selector=app=nginx
 ```
 
-
+### Secrets
+- Using a Secret means that you don't need to include confidential data in your application code.
+- Secrets can be mounted as data volumes or exposed as environment variables to be used by a container in a Pod.
+- Secret needs to be created before any Pods that depend on it
+- behaves same like configmaps... rollout after updates // when mounted as drive, each secret is a file.
+> Caution: Kubernetes Secrets are, by default, stored unencrypted in the API server's underlying data store (etcd). Anyone with API access can retrieve or modify a Secret, and so can anyone with access to etcd.
+- You can use Secrets for purposes such as the following:
+1. Set environment variables for a container.
+2. Provide credentials such as SSH keys or passwords to Pods.
+3. Allow the kubelet to pull container images from private registries.
