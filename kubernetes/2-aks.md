@@ -214,6 +214,7 @@ az account get-access-token --resource https://management.azure.com     --query 
 
 ## Below command forces IMDS 
 az login --identity
+
 # so for az cli
 az login --service-principal   -u $AZURE_CLIENT_ID   -t $AZURE_TENANT_ID   --federated-token "$(cat $AZURE_FEDERATED_TOKEN_FILE)".
 ```
@@ -331,4 +332,6 @@ sequenceDiagram
         Entra-->>Pod: Authentication Failed
     end
   ```
+- The `AWS Instance Metadata Service (IMDS)` is an on-instance service that provides configuration data, network information, and temporary security credentials to your running Amazon EC2 instances. It is universally accessed via the link-local IP address `169.254.169.254`. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
 
+- The `Azure Instance Metadata Service (IMDS)` is a RESTful REST API accessible from within running Azure VMs at the non-routable IP `169.254.169.254`. It provides instance-specific details, managed identity tokens, and scheduled maintenance events without exposing data externally. https://learn.microsoft.com/en-us/azure/virtual-machines/instance-metadata-service?tabs=windows
