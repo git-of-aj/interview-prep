@@ -12,6 +12,7 @@
 | Application expects config files | Volume mount           | `nginx.conf`, `application.yml`, `prometheus.yml`, `haproxy.cfg`                                                                                               |
 | Large structured configuration   | Volume mount           | YAML, JSON, XML, INI files                                                                                                                                     |
 | Configuration changes frequently | Volume mount           | Mounted ConfigMaps can be updated on disk without recreating the ConfigMap itself, though whether the application picks up changes depends on the application. |
+
 ### Pratically checked.... updated configmap (which was mounted as env) and pods don not show new value. | Restart Pods via Rollout
 4 ways to declare config:
 1. Inside a container command and args
@@ -147,6 +148,7 @@ command triggers a graceful, zero-downtime rolling restart of your pods. Under t
 ### Service Account
 - A `default` SA is created in every NameSpace.
 > Kubernetes does not separate Users vs SA because RBAC needs two concepts; it separates them because identity creation, credential management, and lifecycle are fundamentally different for people and software.
+
 | Concern                   | Human User | ServiceAccount |
 | ------------------------- | ---------- | -------------- |
 | Created by Kubernetes     | No         | Yes            |
