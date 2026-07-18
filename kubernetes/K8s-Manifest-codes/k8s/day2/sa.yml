@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: api
+    Deployed: "true"
+    creator: AJ
+    env: dev
+  name: az-cli-sa
+  namespace: nginx-app
+  annotations:
+    azure.workload.identity/client-id: 60c2df9a-efa0-49ae-aee3-4329ac4f6e1b
+    #azure.workload.identity/tenant-id: 
+

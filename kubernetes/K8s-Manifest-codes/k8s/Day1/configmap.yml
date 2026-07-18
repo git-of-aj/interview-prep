@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: learning
+
+data:
+  APP_NAME: "AKS Learning App"
+  ENVIRONMENT: "dev"
+  MESSAGE: "Hello from ConfigMap"

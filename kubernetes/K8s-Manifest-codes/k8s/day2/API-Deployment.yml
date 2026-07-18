@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: api-deployment
+  labels:
+    app: api
+    Deployed: "true"
+    creator: AJ
+    env: dev
+  namespace: nginx-app
+
+spec:
+  replicas: 5
+
+  selector:
+    matchLabels:
+      app: api
+      env: dev
+
+  template:
+    metadata:
+      labels:
+        app: api
+        env: dev
+
+    spec:
+      containers:
+        - name: api
+          image: acr8r.azurecr.io/api:v1.1
+          ports:
+            - containerPort: 8000
+          # envFrom:
+          #   - configMapRef:
+          #       name: simple-configmap
+          envFrom:
+            - secretRef:
+                name: secret-basic-auth
+          volumeMounts:
+            - name: env-vars
+              mountPath: "/etc/simple01"
+              readOnly: true
+      volumes:
+        - name: env-vars
+          configMap:
+            name: simple-configmap

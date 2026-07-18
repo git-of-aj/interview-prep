@@ -1,0 +1,4 @@
+**__pycache__/
+**.venv/
+k8s/
+main.py  
