@@ -238,6 +238,8 @@ Access token for managed identity
 No explicit login is required.
 ```
 - This is why Microsoft recommends using DefaultAzureCredential() inside AKS.
+> When requesting tokens with WorkloadIdentityCredential, pass scopes using the Microsoft Entra ID v2 format <resource>/.default, such as https://management.azure.com/.default. A raw resource URI, such as https://management.azure.com/, can fail because workload identity uses the Microsoft Entra v2 token endpoint rather than the IMDS resource flow used by managed identity. For more information about how scopes work in the v2 token endpoint, see Get a token.
+- [MS DOCS](https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview?tabs=python#azure-identity-client-libraries)
 ```mermaid
 flowchart TD
     A[AKS Pod Starts] --> B[Azure Workload Identity Webhook]
