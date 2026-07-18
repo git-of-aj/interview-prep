@@ -194,3 +194,74 @@ The pod uses that Azure token to access Azure Storage, Key Vault, or other resou
 - Use the AKS managed identity (system- or user-assigned) for cluster infrastructure (for example, managing load balancers, disks, or other Azure resources on behalf of Kubernetes).
 - Use Microsoft Entra Workload Identity with user-assigned managed identities for application workloads.
 ![](https://learn.microsoft.com/en-us/azure/aks/media/workload-identity-overview/workload-id-model.png)
+
+### The Flow
+what I observed: 
+1. az --version worked but az account show failed and asked to login.
+2. I did az login --identity command, then I started getting az account show output 
+3. But above command, `picked up the nodepool managed identity not user assigned managed identity available in the env variables`
+4. I ran az login --service-principal \ -u $AZURE_CLIENT_ID \ -t $AZURE_TENANT_ID \ --federated-token "$(cat $AZURE_FEDERATED_TOKEN_FILE)" since now I'm forcing to use user assigned managed identity, everything worked as intented.
+- The Azure Workload Identity webhook does not authenticate the pod. Instead, it only injects things like:
+```sh
+env | grep AZURE
+AZURE_TENANT_ID=059xxxxxxxxxxxxxxx
+AZURE_FEDERATED_TOKEN_FILE=/var/run/secrets/azure/tokens/azure-identity-token
+AZURE_AUTHORITY_HOST=https://login.microsoftonline.com/
+AZURE_CLIENT_ID=60c2df9xxxxxxxxxxx
+
+# To check how you authenticated
+az account get-access-token --resource https://management.azure.com     --query accessToken -o tsv | cut -d '.' -f2 | base64 -d | jq
+
+## Below command forces IMDS 
+az login --identity
+# so for az cli
+az login --service-principal   -u $AZURE_CLIENT_ID   -t $AZURE_TENANT_ID   --federated-token "$(cat $AZURE_FEDERATED_TOKEN_FILE)".
+```
+- The SDK checks: "Do I have a workload identity?"
+
+It sees
+
+AZURE_CLIENT_ID
+AZURE_TENANT_ID
+AZURE_FEDERATED_TOKEN_FILE
+
+and automatically constructs a `WorkloadIdentityCredential.`
+
+It exchanges
+```
+Kubernetes token
+        ↓
+Microsoft Entra
+        ↓
+Access token for managed identity
+
+No explicit login is required.
+```
+- This is why Microsoft recommends using DefaultAzureCredential() inside AKS.
+```mermaid
+flowchart TD
+    A[AKS Pod Starts] --> B[Azure Workload Identity Webhook]
+
+    B --> C[Inject AZURE_CLIENT_ID]
+    B --> D[Inject AZURE_TENANT_ID]
+    B --> E[Inject AZURE_FEDERATED_TOKEN_FILE]
+    B --> F[Mount Kubernetes Token]
+
+    F --> G[Application Starts]
+
+    G --> H[Azure SDK]
+    H --> H1[WorkloadIdentityCredential]
+    H1 --> H2[Gets Entra Token]
+
+    G --> I[Terraform]
+    I --> I1[Uses OIDC Support]
+
+    G --> J[Azure CLI]
+    J --> K[Requires Explicit Login]
+
+    K --> L["az login --identity"]
+    K --> M["az login --service-principal --federated-token"]
+    L --> N[IMDS<br/>Node Managed Identity]
+    M --> O[Workload Identity<br/>User-assigned Managed Identity]
+
+```
