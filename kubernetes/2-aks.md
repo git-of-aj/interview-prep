@@ -267,3 +267,68 @@ flowchart TD
     M --> O[Workload Identity<br/>User-assigned Managed Identity]
 
 ```
+
+## WHY FEDERATED IDENTITY WITH AKS DETAILS NEEDED AT USER MANAGED ID?
+1. Open Day2 Folder, there we deploy - https://mcr.microsoft.com/en-us/artifact/mar/azure-cli/tag/latest and use workload identity and service account to access azure.
+
+```sh
+VM
+│
+├── Managed Identity attached
+│
+└── Azure knows:
+      "This VM owns this identity."
+----------------
+VM
+   │
+   ▼
+Instance Metadata Service (IMDS)
+   │
+   ▼
+Entra ID
+---------------
+Azure trusts the VM because Azure created the VM and attached the identity. =====> No secrets are needed.
+
+Pods are different.
+********************* Pods are not Azure resources. **************************
+Azure knows nothing about THEM
+```
+> A Managed Identity tells Azure "who you want to be." An AKS OIDC token proves "who you are in Kubernetes." The Federated Credential is the trust policy that tells Microsoft Entra, "When this specific Kubernetes ServiceAccount presents a valid OIDC token from this AKS cluster, allow it to act as this specific Managed Identity." Without that policy, Azure has no secure basis for mapping a Kubernetes identity to an Azure identity.
+```mermaid
+sequenceDiagram
+    participant Pod
+    participant K8s as Kubernetes API Server
+    participant OIDC as AKS OIDC Provider
+    participant Entra as Microsoft Entra ID
+    participant MI as User Assigned Managed Identity
+    participant ARM as Azure Resource Manager
+
+    Note over Pod: Pod starts with ServiceAccount
+
+    K8s->>Pod: Mount ServiceAccount JWT
+    K8s->>Pod: Inject AZURE_CLIENT_ID
+    K8s->>Pod: Inject AZURE_TENANT_ID
+    K8s->>Pod: Inject AZURE_FEDERATED_TOKEN_FILE
+
+    Note over Pod: Application requests Azure credentials
+
+    Pod->>Entra: Present Kubernetes JWT + Managed Identity Client ID
+
+    Entra->>OIDC: Verify JWT signature & issuer
+
+    OIDC-->>Entra: JWT is valid
+
+    Entra->>Entra: Look for Federated Credential on Managed Identity
+
+    alt Federated Credential matches
+        Note over Entra: Issuer matches<br/>Subject matches<br/>Audience matches
+        Entra->>MI: Impersonate Managed Identity
+        MI-->>Entra: Identity confirmed
+        Entra-->>Pod: Azure Access Token
+        Pod->>ARM: Call Azure Resource Manager
+        ARM-->>Pod: Authorized using Managed Identity RBAC
+    else No matching Federated Credential
+        Entra-->>Pod: Authentication Failed
+    end
+  ```
+
