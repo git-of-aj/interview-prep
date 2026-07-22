@@ -337,3 +337,111 @@ sequenceDiagram
 - The `AWS Instance Metadata Service (IMDS)` is an on-instance service that provides configuration data, network information, and temporary security credentials to your running Amazon EC2 instances. It is universally accessed via the link-local IP address `169.254.169.254`. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
 
 - The `Azure Instance Metadata Service (IMDS)` is a RESTful REST API accessible from within running Azure VMs at the non-routable IP `169.254.169.254`. It provides instance-specific details, managed identity tokens, and scheduled maintenance events without exposing data externally. https://learn.microsoft.com/en-us/azure/virtual-machines/instance-metadata-service?tabs=windows
+
+### CSI, CNI, CRI and CRDs
+- CRI = How Kubernetes talks to container runtimes.
+- CNI = How Kubernetes sets up networking.
+- CSI = How Kubernetes manages storage.
+- CRD = A way to teach Kubernetes about entirely new resource types.
+| Concept | Full Form                   | Purpose                                            | Examples                                 |
+| ------- | --------------------------- | -------------------------------------------------- | ---------------------------------------- |
+| **CRI** | Container Runtime Interface | Standard API between kubelet and container runtime | containerd, CRI-O                        |
+| **CNI** | Container Network Interface | Standard for Pod networking                        | Calico, Cilium, Flannel                  |
+| **CSI** | Container Storage Interface | Standard for storage integration                   | AWS EBS CSI, Azure Disk CSI, Ceph CSI    |
+| **CRD** | Custom Resource Definition  | Adds new resource types to the Kubernetes API      | Database, Kafka, Certificate, Prometheus |
+
+```txt
+               Kubernetes Control Plane
+
+                 kubectl
+                    │
+                    ▼
+             Kubernetes API Server
+                    │
+          ┌─────────┴─────────┐
+          │                   │
+          ▼                   ▼
+     Built-in Objects     Custom Objects
+     (Pod, Service)      (CRDs)
+          │                   │
+          ▼                   ▼
+      Scheduler         Operator/Controller
+          │                   │
+          └─────────┬─────────┘
+                    ▼
+                 kubelet
+        ┌──────────┼──────────┐
+        ▼          ▼          ▼
+      CRI        CNI         CSI
+        │          │          │
+        ▼          ▼          ▼
+   Containers   Networking  Storage
+        │          │          │
+        └──────────┴──────────┘
+                   ▼
+             Linux Kernel
+     (Namespaces, cgroups, networking,
+       filesystem, device drivers)
+```
+
+### CRD
+- "Am I just passing data to an application, or am I introducing a new thing that Kubernetes should actively manage?"
+```
+Passing data → ConfigMap or Secret.
+Managing a new type of infrastructure or application lifecycle → CRD (typically with an Operator).
+```
+That's the core problem CRDs solve: they let you express higher-level intent instead of manually assembling many lower-level Kubernetes resources. Like Crossplane, Promethous on CRDs
+
+Suppose you create a CRD called: **Database** Now Kubernetes understands:
+```yml
+apiVersion: company.com/v1
+kind: Database
+```
+You have created a brand new Kubernetes object.
+- Without a CRD:
+```txt
+kubectl apply
+
+↓
+
+Error
+
+Unknown Kind: Database
+```
+- After installing the CRD:
+```txt
+kubectl get databases
+
+works exactly like:
+
+kubectl get pods
+```
+- Diagram: 
+```mermaid
+flowchart TD
+
+    A[Developer] -->|kubectl apply| B[Custom Resource YAML]
+
+    B --> C[Kubernetes API Server]
+
+    C --> D[CRD Installed]
+    D --> E[Store Custom Resource in etcd]
+
+    E --> F[Operator / Controller]
+
+    F --> G[Watch for Custom Resource]
+
+    G --> H[Business Logic]
+
+    H --> I[Create Deployment]
+    H --> J[Create Service]
+    H --> K[Create StatefulSet]
+    H --> L[Create PVC]
+    H --> M[Create Secret]
+
+    I --> N[Application Running]
+    J --> N
+    K --> N
+    L --> N
+    M --> N
+```
