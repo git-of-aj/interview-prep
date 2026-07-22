@@ -343,6 +343,7 @@ sequenceDiagram
 - CNI = How Kubernetes sets up networking.
 - CSI = How Kubernetes manages storage.
 - CRD = A way to teach Kubernetes about entirely new resource types.
+  
 | Concept | Full Form                   | Purpose                                            | Examples                                 |
 | ------- | --------------------------- | -------------------------------------------------- | ---------------------------------------- |
 | **CRI** | Container Runtime Interface | Standard API between kubelet and container runtime | containerd, CRI-O                        |
