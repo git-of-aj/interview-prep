@@ -47,6 +47,11 @@ kubectl events
 ```
 - `kubectl exec -it <pod> -- bash` This works only if: 1. The container is running 2.The image contains a shell (its a distroless image)
 
+```sh
+k rollout status resourceType/Name
+like k rollout status deploy/v1App
+```
+- It's preferred over `--watch` as Automation-Friendly Exit Codes: It returns an exit code of 0 on success and a non-zero code on failure or timeout. `kubectl get deployment -w ` watches indefinitely and never exits on its own, which hangs CI/CD pipelines.
 
 ## alias
 Powershell:
