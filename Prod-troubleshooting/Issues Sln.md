@@ -13,12 +13,18 @@
 - Complete request flow (user > dns > network > targetip > windows service which will respond back)
 - Have few culprits > check or any recent update / infra change 
 - if it broke after update > check what that update includes / read its github issue (like in docker client update).. HTTP2 isn't supported by NTLM clients.
+- **Chain-of-Requests**: Like Intellidocx `403 Error`. We know its coz DNS resolves to Public not private IP. It was working perfectly for last 3 months. So DNS resolution is issue. 
 
 **examples:**
 - if error msg mentions port number, google if its a standard port number. [like 61616 is for AMQ service]
 - then check network connectivity and related process of for that port [maybe got into zombie process]
 - check logs of affected service (like medical portal can't load expense, br dev tools show http 500, so go to logs of that page, which shows some DB error)
 
+## Intellidocx Issue
+- Solution: dedicated Primary Forward Lookup Zone for intellidocx.isdb.org on the idhq.org Domain Controller and configured a static A record pointing directly to the application's Private Endpoint IP address (10.193.18.22)
+
+- Reason: The Domain Controller (DC) DNS query for intellidocx.isdb.org timed out while waiting for a response from the Azure DNS forwarder (168.63.129.16) due to network latency. After the 5-second timeout period, the DC fell back to root hints/public forwarders (e.g., 8.8.8.8) and resolved the application's public IP address instead of the Private Endpoint IP. As a result, upload requests were routed to the public endpoint, which returned a 403 Forbidden response.
+  
 ## DevOps Service connection renew
 - Renew service connection... just open and click
 ![](./images/renew-devops-ss.png)
