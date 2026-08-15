@@ -52,3 +52,4 @@ AWS (S3 + DynamoDB): Go to your AWS DynamoDB console. Find your Terraform lock t
 Azure Blob Storage: Open the Azure Portal. Go to your storage account container and look for a file ending in .tflock. Break the blob lease or delete this lock file.
 ```
 - Use the -lock-timeout flag during runs to gracefully wait for existing locks to clear (e.g., `terraform apply -lock-timeout=3m`).
+- .tfvars = manually specified variable values (load with -var-file), while auto.tfvars = automatically loaded values; use *.tfvars for environment-specific files and *.auto.tfvars for defaults you always want Terraform to load.
