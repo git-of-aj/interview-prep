@@ -1,5 +1,7 @@
 # DNS Troubleshooting Revision Notes — pension.isdb.org
 
+commands here: https://gist.github.com/Trainer-AJ/95c6123b90ba7a20d23bb018abb87d88
+
 ## 1. First understand the request flow
 
 For this environment, the expected flow is:
