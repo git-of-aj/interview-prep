@@ -5,3 +5,4 @@
 - UV
 - fastapi
 - pyodbc
+- idiomatic Python patterns
