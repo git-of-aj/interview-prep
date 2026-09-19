@@ -7,6 +7,15 @@ Events:
   ----     ------          ----                  ----                         -------
   Warning  VolumeMismatch  25s (x26 over 6m36s)  persistentvolume-controller  Cannot bind to requested volume "azure-disk-pv": storageClassName does not match
 ```
+- AFTER FIXING:
+```sh
+k get pv,pvc
+NAME                             CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                    STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+persistentvolume/azure-disk-pv   90Gi       RWO            Retain           Bound    default/azure-disk-pvc   managed-csi    <unset>                          11s
+
+NAME                                   STATUS   VOLUME          CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/azure-disk-pvc   Bound    azure-disk-pv   90Gi       RWO            managed-csi    <unset>                 7s
+```
 **Why managed-csi is okay here**
 
 This is a subtle but important distinction.
