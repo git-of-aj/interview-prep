@@ -97,3 +97,19 @@ ERROR CODE: BadRequest
 }               ========================> AKS is created in ONLY ZONE 3 
 --------------------------------------------------------------------------------
 ```
+### Others pods don't start coz PVC access mode is -  readwriteonce
+```txt
+ k get po -w
+NAME                                 READY   STATUS              RESTARTS   AGE
+my-app-deployment-74c45d45c8-5k4mp   1/1     Running             0          55s
+my-app-deployment-74c45d45c8-cqd9v   0/1     ContainerCreating   0          55s
+my-app-deployment-74c45d45c8-h6z5t   0/1     ContainerCreating   0          55s
+```
+> Pod describe
+```txt
+Events:
+  Type     Reason              Age   From                     Message
+  ----     ------              ----  ----                     -------
+  Normal   Scheduled           28s   default-scheduler        Successfully assigned default/my-app-deployment-74c45d45c8-cqd9v to aks-userpool-30242799-vmss000000
+  Warning  FailedAttachVolume  28s   attachdetach-controller  Multi-Attach error for volume "az-pv" Volume is already used by pod(s) my-app-deployment-74c45d45c8-r5k4d
+```
