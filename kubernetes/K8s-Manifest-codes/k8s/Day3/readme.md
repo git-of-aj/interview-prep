@@ -94,6 +94,6 @@ ERROR CODE: BadRequest
     "code": "BadRequest",
     "message": "Disk /subscriptions/99d8f8e9-1b37-4b2d-b102-416a5bc55c43/resourceGroups/k8ss/providers/Microsoft.Compute/disks/aks-disk cannot be attached to the VM because it is not in zone '3'."
   }
-}
+}               ========================> AKS is created in ONLY ZONE 3 
 --------------------------------------------------------------------------------
 ```
