@@ -36,6 +36,35 @@ The PersistentVolume "azure-disk-pv" is invalid: spec.persistentvolumesource: Fo
    "FSType": "",
    "VolumeAttributes": {
 ```
+
+> My assumption was even though I have a azure disk of 1024 GiB but since in k8s PV (110 GB) and PVC (90 GB), I expected to see 90 GB inside container on running df -h\
+```txt
+Kubernetes does not automatically do:
+
+1024 GiB Azure disk
+       ↓
+partition to 110 GiB
+       ↓
+filesystem 110 GiB
+
+And a PVC requesting 90 GiB doesn't cause another partition:
+```
+- this is different with dynamically provisioned disks
+- If you create a PVC like:
+```yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-csi
+  resources:
+    requests:
+      storage: 90Gi
+```
+- and the Azure Disk CSI driver dynamically provisions the disk, Kubernetes/CSI will normally create an Azure disk sized according to the request (subject to the storage class/driver behavior).
 -----------
 > 💡 Migrating to CSI drivers from in-tree (means the code logic to connects resides in main k8s code, so volume provider can only do bugFix when k8s releases a patch) plugins
 # ChatGPT:
