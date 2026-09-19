@@ -330,3 +330,18 @@ kubectl get pods -n=dev-dotnet
 kubectl describe pod podName -n=dev-dotnet
 ```
 - describe tells ip, deployed image sha, events with timestamp
+
+### PVC
+```sh
+k top no --sort-by=memory
+NAME                                CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+aks-userpool-30242799-vmss000000    148m         7%       2474Mi          42%         
+aks-agentpool-30242799-vmss000000   170m         8%       2256Mi          38%   
+
+kubectl top pods -A --sort-by=memory
+```
+- The first answers "How busy is my cluster?", and the second answers "What's consuming the memory?".
+- When a Kubernetes PersistentVolumeClaim (PVC) is stuck in a Pending status, it means the control plane cannot find or dynamically provision a PersistentVolume (PV) that satisfies the claim's requirements.
+```
+kubectl describe pvc <your-pvc-name>
+```
