@@ -1,3 +1,4 @@
+# Code Samples on HandOn Day 3 folder !!
 ## StorageClass
 - A StorageClass provides a way for administrators to describe the classes (variety or types) of storage they offer.
 - cluster admin should create and expose variety of storageClassName.
@@ -20,6 +21,21 @@
 > Note: You can only use the volume expansion feature to grow a Volume, not to shrink it.
 - Claims can request specific size and access modes (e.g., they can be mounted ReadWriteOnce, ReadOnlyMany, ReadWriteMany, or ReadWriteOncePod, see [AccessModes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
+#### YOu can Edit PV or PVC after creation, Like here tried changing underlying resourceID:
+```txt
+ nano pv.yml 
+ananay [ ~ ]$ k apply -f pv.yml 
+The PersistentVolume "azure-disk-pv" is invalid: spec.persistentvolumesource: Forbidden: spec.persistentvolumesource is immutable after creation
+@@ -22,7 +22,7 @@
+  "StorageOS": null,
+  "CSI": {
+   "Driver": "disk.csi.azure.com",
+-  "VolumeHandle": "/subscriptions/99d8f8e9-1b37-4b2d-b102-416a5bc55c43/resourceGroups/k8ss/providers/Microsoft.Compute/disks/aks-disk",
++  "VolumeHandle": "/subscriptions/99d8f8e9-1b37-4b2d-b102-416a5bc55c43/resourceGroups/k8ss/providers/Microsoft.Compute/disks/aks-disk2",
+   "ReadOnly": false,
+   "FSType": "",
+   "VolumeAttributes": {
+```
 -----------
 > 💡 Migrating to CSI drivers from in-tree (means the code logic to connects resides in main k8s code, so volume provider can only do bugFix when k8s releases a patch) plugins
 # ChatGPT:
