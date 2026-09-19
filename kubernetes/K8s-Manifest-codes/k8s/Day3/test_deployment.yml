@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    app: my-app
+spec:
+  replicas: 1 # Note: ReadWriteOnce PVCs generally support only 1 replica on a single node
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: web-container
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        # 1. Mount the volume inside the container path
+        volumeMounts:
+        - name: storage-volume
+          mountPath: /data/aj # The directory inside the container
+      # 2. Define the volume using the PVC name
+      volumes:
+      - name: storage-volume
+        persistentVolumeClaim:
+          claimName: az-disk-pvc # Must exactly match the metadata.name of your PVC
