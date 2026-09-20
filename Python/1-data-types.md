@@ -542,3 +542,938 @@ documents_b = {"doc3", "doc4", "doc5", "doc6"}
  ### Your turn
 
  Start with **Exercise 1** and send me your code. I'll review it, point out anything I'd expect an AI SDE candidate to improve, and then we'll move into **mutability, references, `==` vs `is`, shallow/deep copies, and the Python object model**.
+
+# Part 2
+You're right — my first answer focused too much on **constructors** (`list()`, `set()`, etc.) and missed the much more useful **type-specific methods**, especially things like `dict.fromkeys()`.
+
+ I checked the current Python documentation. One important distinction is:
+
+ > **Constructor/conversion:** `list(x)`, `tuple(x)`, `set(x)`, `dict(x)`\
+>  **Type method:** `dict.fromkeys(x)`, `str.join(x)`, `list.copy()`, `set.union()`, etc.
+
+ Python's built-in types have a surprisingly useful set of methods for transforming, combining, filtering, and restructuring data.  Python documentation+1
+
+ Here's the cheat sheet I'd recommend learning.
+
+ ## 1\. `dict` — especially useful for conversions
+
+ ### `dict.fromkeys()`
+
+ Probably the exact method you were thinking of.
+
+```
+names = ["Ali", "John", "Sara"]
+
+d = dict.fromkeys(names)
+
+print(d)
+# {'Ali': None, 'John': None, 'Sara': None}
+```
+
+ You can provide a default value:
+
+```
+d = dict.fromkeys(names, 0)
+
+print(d)
+# {'Ali': 0, 'John': 0, 'Sara': 0}
+```
+
+ This is particularly useful for turning a list into a dictionary.
+
+```
+numbers = [1, 2, 3, 4]
+
+dict.fromkeys(numbers, "unknown")
+# {1: 'unknown', 2: 'unknown', 3: 'unknown'}
+```
+
+ And here's the connection to your previous question:
+
+```
+numbers = [3, 1, 2, 3, 1, 4]
+
+unique = list(dict.fromkeys(numbers))
+
+print(unique)
+# [3, 1, 2, 4]
+```
+
+ This works because dictionaries preserve **insertion order**. Python guarantees dictionary insertion order.  Python documentation
+
+ So:
+
+```
+list
+  ↓
+dict.fromkeys()
+  ↓
+dictionary with unique keys
+  ↓
+list()
+  ↓
+ordered unique list
+```
+
+ ### `dict()`
+
+ Convert pairs into a dictionary:
+
+```
+pairs = [
+    ("name", "Ali"),
+    ("age", 25),
+    ("city", "Dubai")
+]
+
+dict(pairs)
+```
+
+ Result:
+
+```
+{
+    "name": "Ali",
+    "age": 25,
+    "city": "Dubai"
+}
+```
+
+ You can also use `zip()`:
+
+```
+keys = ["name", "age", "city"]
+values = ["Ali", 25, "Dubai"]
+
+dict(zip(keys, values))
+```
+
+ Result:
+
+```
+{'name': 'Ali', 'age': 25, 'city': 'Dubai'}
+```
+
+ The `dict()` constructor accepts mappings or iterables containing two-element iterables.  Python documentation
+
+ ### `keys()`, `values()`, `items()`
+
+ Extremely important for converting dictionaries into other types:
+
+```
+d = {
+    "a": 10,
+    "b": 20,
+    "c": 30
+}
+```
+
+```
+list(d.keys())
+# ['a', 'b', 'c']
+
+list(d.values())
+# [10, 20, 30]
+
+list(d.items())
+# [('a', 10), ('b', 20), ('c', 30)]
+```
+
+ You can also convert them to sets:
+
+```
+set(d.keys())
+set(d.values())
+set(d.items())
+```
+
+ ### `get()`
+
+ Safe dictionary lookup:
+
+```
+d = {"name": "Ali"}
+
+d.get("name")
+# 'Ali'
+
+d.get("age")
+# None
+
+d.get("age", 0)
+# 0
+```
+
+ Compare:
+
+```
+d["age"]
+# KeyError
+```
+
+---
+
+ # 2\. `list` — methods you should know
+
+ Suppose:
+
+```
+numbers = [1, 2, 3]
+```
+
+ ### `append()`
+
+ Add **one object**:
+
+```
+numbers.append(4)
+
+# [1, 2, 3, 4]
+```
+
+ Important:
+
+```
+numbers.append([5, 6])
+
+# [1, 2, 3, 4, [5, 6]]
+```
+
+ It adds the list as one element.
+
+ ### `extend()`
+
+ Add multiple elements:
+
+```
+numbers = [1, 2, 3]
+
+numbers.extend([4, 5, 6])
+
+# [1, 2, 3, 4, 5, 6]
+```
+
+ This is one of the most important differences:
+
+```
+append([4, 5])
+# adds ONE element
+
+extend([4, 5])
+# adds TWO elements
+```
+
+ ### `insert()`
+
+ Insert at a specific position:
+
+```
+numbers = [1, 2, 4]
+
+numbers.insert(2, 3)
+
+# [1, 2, 3, 4]
+```
+
+ ### `remove()`
+
+ Remove by **value**:
+
+```
+numbers = [10, 20, 30]
+
+numbers.remove(20)
+
+# [10, 30]
+```
+
+ ### `pop()`
+
+ Remove by **index** and return the removed value:
+
+```
+numbers = [10, 20, 30]
+
+x = numbers.pop(1)
+
+print(x)
+# 20
+
+print(numbers)
+# [10, 30]
+```
+
+ Without an index:
+
+```
+numbers.pop()
+```
+
+ removes the last element.
+
+ ### `index()`
+
+ Find position:
+
+```
+numbers = [10, 20, 30]
+
+numbers.index(20)
+# 1
+```
+
+ ### `count()`
+
+ Count occurrences:
+
+```
+numbers = [1, 2, 2, 2, 3]
+
+numbers.count(2)
+# 3
+```
+
+ ### `sort()`
+
+ Sort **in place**:
+
+```
+numbers = [4, 1, 3, 2]
+
+numbers.sort()
+
+print(numbers)
+# [1, 2, 3, 4]
+```
+
+ Reverse:
+
+```
+numbers.sort(reverse=True)
+
+# [4, 3, 2, 1]
+```
+
+ Sort using a key:
+
+```
+names = ["Ali", "Alexander", "Bob"]
+
+names.sort(key=len)
+
+# ['Ali', 'Bob', 'Alexander']
+```
+
+ ### `reverse()`
+
+ Reverse the list in place:
+
+```
+numbers = [1, 2, 3, 4]
+
+numbers.reverse()
+
+# [4, 3, 2, 1]
+```
+
+ ### `copy()`
+
+ Make a shallow copy:
+
+```
+a = [1, 2, 3]
+
+b = a.copy()
+```
+
+ Now `b` is a separate list.
+
+---
+
+ # 3\. `tuple`
+
+ Tuples have far fewer methods because they're immutable.
+
+```
+t = (10, 20, 20, 30)
+```
+
+ ### `count()`
+
+```
+t.count(20)
+# 2
+```
+
+ ### `index()`
+
+```
+t.index(30)
+# 3
+```
+
+ ### Convert tuple → list
+
+```
+list(t)
+```
+
+ ### Convert list → tuple
+
+```
+tuple([1, 2, 3])
+```
+
+ The `tuple()` constructor preserves the order of the iterable's elements.  Python documentation
+
+---
+
+ # 4\. `set` — incredibly useful for data manipulation
+
+ Remember:
+
+```
+set
+```
+
+ is specifically designed for **unique elements and set operations**. It does **not** preserve element position/insertion order.  Python documentation
+
+```
+a = {1, 2, 3}
+b = {3, 4, 5}
+```
+
+ ### `union()`
+
+ Everything from both:
+
+```
+a.union(b)
+
+# {1, 2, 3, 4, 5}
+```
+
+ Or:
+
+```
+a | b
+```
+
+ ### `intersection()`
+
+ Elements common to both:
+
+```
+a.intersection(b)
+
+# {3}
+```
+
+ Or:
+
+```
+a & b
+```
+
+ ### `difference()`
+
+ Elements in `a` but not `b`:
+
+```
+a.difference(b)
+
+# {1, 2}
+```
+
+ Or:
+
+```
+a - b
+```
+
+ ### `symmetric_difference()`
+
+ Elements in either set, but **not both**:
+
+```
+a.symmetric_difference(b)
+
+# {1, 2, 4, 5}
+```
+
+ Or:
+
+```
+a ^ b
+```
+
+ ### `issubset()`
+
+```
+a = {1, 2}
+b = {1, 2, 3}
+
+a.issubset(b)
+# True
+```
+
+ Or:
+
+```
+a <= b
+```
+
+ ### `issuperset()`
+
+```
+b.issuperset(a)
+# True
+```
+
+ ### `isdisjoint()`
+
+ Check whether two sets have **nothing in common**:
+
+```
+a = {1, 2}
+b = {3, 4}
+
+a.isdisjoint(b)
+# True
+```
+
+ These set operations are specifically documented as core uses of the built-in `set` type.  Python documentation
+
+---
+
+ # 5\. `str` — perhaps the most useful methods
+
+ Strings have a huge number of useful transformation methods.
+
+ ### `split()`
+
+ String → list:
+
+```
+text = "Python is awesome"
+
+text.split()
+
+# ['Python', 'is', 'awesome']
+```
+
+ With a separator:
+
+```
+"apple,banana,orange".split(",")
+
+# ['apple', 'banana', 'orange']
+```
+
+ This is one of the most important **datatype transformations** in Python.
+
+ ### `join()`
+
+ List → string:
+
+```
+words = ["Python", "is", "awesome"]
+
+" ".join(words)
+
+# 'Python is awesome'
+```
+
+ Another example:
+
+```
+names = ["Ali", "John", "Sara"]
+
+", ".join(names)
+
+# 'Ali, John, Sara'
+```
+
+ Think of it as:
+
+```
+split() → string → list
+
+join()  → list → string
+```
+
+ ### `replace()`
+
+```
+text = "I like Java"
+
+text.replace("Java", "Python")
+
+# 'I like Python'
+```
+
+ ### `strip()`
+
+ Remove whitespace from both ends:
+
+```
+text = "   hello   "
+
+text.strip()
+
+# 'hello'
+```
+
+ Also:
+
+```
+text.lstrip()
+text.rstrip()
+```
+
+ ### `lower()`, `upper()`
+
+```
+"Hello World".lower()
+# 'hello world'
+
+"Hello World".upper()
+# 'HELLO WORLD'
+```
+
+ ### `capitalize()`
+
+```
+"hello world".capitalize()
+
+# 'Hello world'
+```
+
+ ### `title()`
+
+```
+"hello world".title()
+
+# 'Hello World'
+```
+
+ ### `startswith()` / `endswith()`
+
+```
+"python.py".endswith(".py")
+# True
+
+"python.py".startswith("py")
+# True
+```
+
+ ### `find()`
+
+```
+text = "hello world"
+
+text.find("world")
+# 6
+```
+
+ Returns `-1` if not found.
+
+ ### `count()`
+
+```
+"banana".count("a")
+# 3
+```
+
+---
+
+ # 6\. `str` ↔ `list` is a very important pattern
+
+ Learn these together:
+
+```
+text = "apple,banana,orange"
+
+fruits = text.split(",")
+
+print(fruits)
+# ['apple', 'banana', 'orange']
+```
+
+ Then reverse it:
+
+```
+text = ",".join(fruits)
+
+print(text)
+# apple,banana,orange
+```
+
+ So:
+
+```
+"apple,banana,orange"
+        ↓ split(",")
+["apple", "banana", "orange"]
+        ↓ join(",")
+"apple,banana,orange"
+```
+
+---
+
+ # 7\. `str` → `set` for unique characters
+
+```
+word = "banana"
+
+set(word)
+
+# {'b', 'a', 'n'}
+```
+
+ But remember that the set itself doesn't preserve the character order.  Python documentation
+
+ If you want **unique characters while preserving order**:
+
+```
+word = "banana"
+
+list(dict.fromkeys(word))
+
+# ['b', 'a', 'n']
+```
+
+ That's the same powerful pattern again.
+
+---
+
+ # 8\. `range`
+
+ `range()` is technically a built-in sequence type, and it is especially useful for generating integer sequences.  Python documentation
+
+```
+range(5)
+```
+
+ represents:
+
+```
+0 1 2 3 4
+```
+
+ Convert it:
+
+```
+list(range(5))
+# [0, 1, 2, 3, 4]
+
+tuple(range(5))
+# (0, 1, 2, 3, 4)
+
+set(range(5))
+# {0, 1, 2, 3, 4}
+```
+
+ And:
+
+```
+list(range(2, 10, 2))
+# [2, 4, 6, 8]
+```
+
+---
+
+ # 9\. The really important conversion toolbox
+
+ If you're learning Python, I'd memorize these relationships:
+
+ | From | To | Useful method/function |
+| --- | --- | --- |
+| `list` | `tuple` | `tuple()` |
+| `tuple` | `list` | `list()` |
+| `list` | `set` | `set()` |
+| `set` | `list` | `list()` |
+| `list` | `dict` | `dict.fromkeys()` / `dict()` |
+| `dict` | `list` | `list()` |
+| `dict` | keys | `dict.keys()` |
+| `dict` | values | `dict.values()` |
+| `dict` | pairs | `dict.items()` |
+| `string` | `list` | `str.split()` |
+| `list` | `string` | `str.join()` |
+| `string` | `set` | `set()` |
+| `range` | `list` | `list()` |
+| `range` | `tuple` | `tuple()` |
+| `range` | `set` | `set()` |
+| `int` | `string` | `str()` |
+| `string` | `int` | `int()` |
+| `float` | `int` | `int()` |
+| `int` | `float` | `float()` |
+
+---
+
+ # 10\. But there's another category you should learn
+
+ This is where Python starts getting really interesting.
+
+ There are **three different things** you should distinguish:
+
+ ### A. Constructors
+
+```
+list(x)
+tuple(x)
+set(x)
+dict(x)
+str(x)
+int(x)
+float(x)
+```
+
+ They create/convert objects.
+
+ ### B. Methods belonging to a datatype
+
+```
+my_list.append()
+my_list.sort()
+
+my_dict.get()
+my_dict.items()
+my_dict.fromkeys()
+
+my_set.union()
+my_set.intersection()
+
+my_string.split()
+my_string.join()
+my_string.replace()
+```
+
+ They provide operations specific to that datatype.
+
+ ### C. Built-in functions
+
+ Python also gives you functions that work across many datatypes:
+
+```
+len()
+sorted()
+reversed()
+enumerate()
+zip()
+map()
+filter()
+any()
+all()
+min()
+max()
+sum()
+```
+
+ For example:
+
+```
+numbers = [4, 1, 8, 2]
+
+len(numbers)
+# 4
+
+sorted(numbers)
+# [1, 2, 4, 8]
+
+max(numbers)
+# 8
+
+min(numbers)
+# 1
+
+sum(numbers)
+# 15
+```
+
+ And these often become **conversion tools** when combined with constructors:
+
+```
+list(reversed(numbers))
+```
+
+```
+list(enumerate(["a", "b", "c"]))
+```
+
+```
+dict(zip(["a", "b"], [10, 20]))
+```
+
+ The last one is particularly important:
+
+```
+keys = ["name", "age"]
+values = ["Ali", 25]
+
+dict(zip(keys, values))
+
+# {'name': 'Ali', 'age': 25}
+```
+
+---
+
+ ## The mental model I recommend
+
+ Instead of memorizing hundreds of isolated methods, organize Python's built-ins like this:
+
+```
+                    PYTHON DATA MANIPULATION
+                              │
+          ┌───────────────────┼───────────────────┐
+          ↓                   ↓                   ↓
+     CONSTRUCTORS          METHODS          BUILT-INS
+          │                   │                   │
+    list()                split()              len()
+    tuple()               join()               sorted()
+    set()                 append()             zip()
+    dict()                extend()             enumerate()
+    str()                  get()                map()
+    int()                  items()              filter()
+    float()                union()              any()
+```
+
+ And then learn the **high-value transformations**:
+
+```
+# unique + preserve order
+list(dict.fromkeys(data))
+
+# list → dictionary
+dict(zip(keys, values))
+
+# string → list
+text.split(",")
+
+# list → string
+",".join(items)
+
+# iterable → list
+list(iterable)
+
+# iterable → tuple
+tuple(iterable)
+
+# iterable → set
+set(iterable)
+
+# dictionary → pairs
+list(d.items())
+
+# dictionary → keys
+list(d.keys())
+
+# dictionary → values
+list(d.values())
+```
+
+ These patterns are much more useful in real Python programming than trying to memorize every method in alphabetical order.
+
+ The official Python documentation has the complete reference for the built-in types and their methods; the current docs cover `list`, `tuple`, `range`, `str`, `set`, `dict`, and other built-in types.  Python documentation+1
+
+ If you're learning Python seriously, the **next thing I'd recommend learning is `zip()`, `enumerate()`, `map()`, `filter()`, comprehensions, and `sorted(key=...)`** — together they form a very powerful "data transformation toolkit."
