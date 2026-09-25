@@ -315,6 +315,7 @@ kubectl get nodes
 kubectl top pods -n <ns>
 kubectl describe deployment <name> -n <ns>
 kubectl get endpoints -n <ns>
+kubectl debug -it web-pod --image=nicolaka/netshoot --target=nginx
 ```
 >  kubectl get pods -n dev-node
 NAME                                       READY   STATUS             RESTARTS   AGE
