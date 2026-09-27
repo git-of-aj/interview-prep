@@ -1,5 +1,9 @@
 ### Helm
 
+- it renders a chart into Kubernetes resource definitions and uses the Kubernetes API to create/update those resources.
+
+- To use Helm with Azure Kubernetes Service (AKS), you do not install Helm inside the cluster. Since Helm v3, it is a client-only tool. You install the Helm CLI on your local machine (or use Azure Cloud Shell, where it is pre-installed) and connect it to your AKS cluster
+
 ```
 Chart   = Blueprint / Package
 Release = Installed instance
