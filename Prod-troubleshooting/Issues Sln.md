@@ -1,3 +1,9 @@
+> WIndows screen stuck on side after using 2nd screen ? : Alt + Space then M for the move option, followed by arrow keys
+
+> Azure Portal >> `Service Health` >> Health Advisiories >> Here MS publishes if there's any update to infra that can break things.
+
+## ALWAYS PIN THE VERSION OF PROGRAM ETC U USING.. LATEST VERSION MAY BLOCK OLD CIPHER SUITES ETC.. APP STOP WORKING
+
 # what should you know
 - Browser dev tools
 - curl command
@@ -13,18 +19,108 @@
 - Complete request flow (user > dns > network > targetip > windows service which will respond back)
 - Have few culprits > check or any recent update / infra change 
 - if it broke after update > check what that update includes / read its github issue (like in docker client update).. HTTP2 isn't supported by NTLM clients.
-- **Chain-of-Requests**: Like Intellidocx `403 Error`. We know its coz DNS resolves to Public not private IP. It was working perfectly for last 3 months. So DNS resolution is issue. 
 
 **examples:**
 - if error msg mentions port number, google if its a standard port number. [like 61616 is for AMQ service]
 - then check network connectivity and related process of for that port [maybe got into zombie process]
 - check logs of affected service (like medical portal can't load expense, br dev tools show http 500, so go to logs of that page, which shows some DB error)
 
-## Intellidocx Issue
-- Solution: dedicated Primary Forward Lookup Zone for intellidocx.isdb.org on the idhq.org Domain Controller and configured a static A record pointing directly to the application's Private Endpoint IP address (10.193.18.22)
+## DevOps Swift Project - Which java is used?
+> version 21 specified in the pipleline is only for building the maven project. Not for the actual java version to be used in runtime
+![alt text](images/packeto-jvm-vendor.png)  
+- This confirm 1 fact which we mentioned earlier.. Java and related things in swift is governed by pom.xml (paketo buildpacks) not Microsoft..
+Pipeline:
+```yml
+trigger:
+  branches:
+    include:
+      - prod
+  paths:
+    include:
+      - src/**
 
-- Reason: The Domain Controller (DC) DNS query for intellidocx.isdb.org timed out while waiting for a response from the Azure DNS forwarder (168.63.129.16) due to network latency. After the 5-second timeout period, the DC fell back to root hints/public forwarders (e.g., 8.8.8.8) and resolved the application's public IP address instead of the Private Endpoint IP. As a result, upload requests were routed to the public endpoint, which returned a 403 Forbidden response.
+
+pr: none
+
+variables:
+  acrServiceConnection: 'container-registry-P01'
+  containerRegistry: 'crisdbswiftcicdprod01.azurecr.io'
+  imageRepository: 'swiftapi/swiftservice'
+
+jobs:
+- job: DockerBuild
+  displayName: 'Build and Push Docker'
+  pool:
+    vmImage: 'ubuntu-latest'
   
+  steps:
+  # Checkout
+  - checkout: self
+  
+  # Verify Branch
+  - script: |
+      echo "Current branch: $(Build.SourceBranchName)"
+      ls -ltrah
+    displayName: 'Show Branch'
+  
+  # Cache Maven
+  - task: Cache@2
+    displayName: 'Cache Maven packages'
+    inputs:
+      key: 'maven | "$(Agent.OS)" | **/pom.xml'
+      path: $(Pipeline.Workspace)/.m2/repository
+  
+  # Setup Java
+  - task: JavaToolInstaller@0
+    displayName: 'Setup Java 21'
+    inputs:
+      versionSpec: '21'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+  
+  # Login Docker
+  - task: Docker@2
+    displayName: 'Docker login to ACR'
+    inputs:
+      containerRegistry: '$(acrServiceConnection)'
+      command: 'login'
+  
+  # Build and Push Docker Image
+  - task: Maven@4
+    displayName: 'Docker Build & Push'
+    inputs:
+      goals: 'spring-boot:build-image'
+      options: '-Pazure-devops -DskipTests -Dmaven.repo.local=$(Pipeline.Workspace)/.m2/repository'
+    env:
+      BUILD_BUILDID: $(Build.BuildId)
+      BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
+
+  - bash: |
+      docker tag $(containerRegistry)/$(imageRepository):$(Build.BuildId) \
+      $(containerRegistry)/$(imageRepository):prod-$(Build.BuildId)
+
+  - task: Docker@2
+    displayName: 'Push additional tags'
+    inputs:
+      containerRegistry: '$(acrServiceConnection)'
+      repository: '$(imageRepository)'
+      command: 'push'
+      tags: |
+        prod-$(Build.BuildId)
+    condition: succeededOrFailed()
+  
+  # Cleanup
+  - script: 'docker system prune -f'
+    displayName: 'Cleanup Docker'
+    condition: always()
+```
+and `pom.xml`: build 1 => 21.0.10 build2 after few months => 21.0.11
+```xml
+<env>
+                            <BP_JVM_VERSION>21.*</BP_JVM_VERSION>
+                            <BPE_APPEND_JAVA_TOOL_OPTIONS xml:space="preserve"> -XX:ActiveProcessorCount=3 -Dreactor.netty.pool.maxIdleTime=60000 -Dreactor.netty.pool.leasingStrategy=lifo</BPE_APPEND_JAVA_TOOL_OPTIONS>
+                        </env>
+```
 ## DevOps Service connection renew
 - Renew service connection... just open and click
 ![](./images/renew-devops-ss.png)
@@ -64,11 +160,6 @@ done < <(az devops project list --query "value[].name" -o tsv)
 ## Permissions get reverted back when user tried add variable in release pipeline
 - check interitance on `i` tab, change permissions there in parent
 
-## Get All PAT Tokens in ADO
-- PAT is now discouraged [Blog](https://devblogs.microsoft.com/devops/reducing-pat-usage-across-azure-devops/)
-[Github Gist with Powershell script that lists all PAT](https://gist.github.com/kickinattech/188f860277ec86634639188fdc80a05c)
-- if `targetAccounts            : ` Empty or Null then its a Global PAT. 
-- Use MS Login Pop Up window to login to Azure Repo instead of Pat - [ms docs](https://learn.microsoft.com/en-us/azure/devops/repos/git/set-up-credential-managers?view=azure-devops)
 ## HTTP2 and NTLM apps broke >> App GW V2 Migration
 [MS DOCS - Windows authentication (NTLM/Kerberos/Negotiate) is not supported with HTTP/2. In this case IIS will fall back to HTTP/1.1.](https://learn.microsoft.com/en-us/iis/get-started/whats-new-in-iis-10/http2-on-iis)
 > Kerberos is the modern, secure default authentication protocol for Active Directory, utilizing tickets for mutual authentication, while NTLM is a legacy, less secure, challenge-response protocol.
@@ -270,7 +361,7 @@ in **Allowed Token Audiences**.
 
 Even if the audience matches, EasyAuth can reject the token when:
 
-*   App exposes **delegated scopes**, but token is **app-only (.default)**
+*   App exp oses **delegated scopes**, but token is **app-only (.default)**
 *   Or App exposes **app roles**, but token is **delegated**
 *   Or the audience matches but no scope/role was granted
 
@@ -500,7 +591,7 @@ It was noticed that the AMQ service would start and then stop immediately.
 Looking at the AMQ logs (only accessible locally):
 
 ```text
-D:\FusionInvest\Servers\Sophis\AMQ\apache-activemq\data
+D:\FusionInvest\Sophis\Servers\sophis\AMQ\apache-activemq\data server: APMISYSP01
 ```
 
 it was observed that the process could not bind to the standard port **61616**.
