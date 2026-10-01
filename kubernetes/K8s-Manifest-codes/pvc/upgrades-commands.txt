@@ -1,0 +1,18 @@
+echo 'SOURCE: CHATGPT'
+
+az aks show \
+  --resource-group "$RG" \
+  --name "$AKS" \
+  --query "{name:name, kubernetesVersion:kubernetesVersion, provisioningState:provisioningState}" \
+  --output table
+
+az aks nodepool list \
+  --resource-group "$RG" \
+  --cluster-name "$AKS" \
+  --query "[].{Name:name,Version:orchestratorVersion,Mode:mode,Count:count,OS:osType,SKU:vmSize}" \
+  --output table
+
+az aks get-upgrades \
+  --resource-group "$RG" \
+  --name "$AKS" \
+  --output table

@@ -122,6 +122,13 @@ apps/
 - **Helm** shines when you consume software created by others.For example, installing: NGINX Ingress Controller or Prometheus monitoring
 - 
 ## AKS Permissions
+- To ensure `POD` at the time of creation can access File-share or Blob (Maybe as PVC) then grant `kubelet of AKS` permissions it is in format: `aksName-agentpool`, there's also az cli command to get it's name.. 
+```sh
+az aks show \
+  --name <aks-cluster-name> \
+  --resource-group <resource-group-name> \
+  --query "identityProfile.kubeletidentity"
+```
 - Network Contributor + Contributor (at AKS Managed RG) to `user assigned Managed Identity of AKS` ==> The AKS control plane needs permissions to create Azure resources.This is cluster-level identity. It is NOT normally used by your application pods.
 - **Deprecated** - Microsoft has moved away from AAD Pod Identity. Here each pod was given a identity which was intercepted at Node level to finally get token from azure. The recommended replacement is:
 - `Microsoft Entra Workload Identity`: 
@@ -345,4 +352,9 @@ kubectl top pods -A --sort-by=memory
 - When a Kubernetes PersistentVolumeClaim (PVC) is stuck in a Pending status, it means the control plane cannot find or dynamically provision a PersistentVolume (PV) that satisfies the claim's requirements.
 ```
 kubectl describe pvc <your-pvc-name>
+```
+
+- execute commands in one line in pod
+```sh
+k exec -it nginx-77d8d866d-6sjjm -- sh -c "echo 'The data got changed from nginx-77d8d866d-6sjjm' >> /usr/share/nginx/html/test.txt"
 ```

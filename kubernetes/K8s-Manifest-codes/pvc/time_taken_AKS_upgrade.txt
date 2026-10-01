@@ -1,0 +1,11 @@
+bash t.sh 
+Success Count: 334 | Unsuccessful Count: 0Unsuccessful request timestamp: 2026-10-01 16:38:57 | HTTP Status: 000
+Success Count: 362 | Unsuccessful Count: 1Unsuccessful request timestamp: 2026-10-01 16:39:31 | HTTP Status: 000
+Success Count: 874 | Unsuccessful Count: 2Unsuccessful request timestamp: 2026-10-01 16:48:14 | HTTP Status: 000
+Success Count: 874 | Unsuccessful Count: 3Unsuccessful request timestamp: 2026-10-01 16:48:15 | HTTP Status: 000
+Success Count: 874 | Unsuccessful Count: 4Unsuccessful request timestamp: 2026-10-01 16:48:16 | HTTP Status: 000
+Success Count: 874 | Unsuccessful Count: 5Unsuccessful request timestamp: 2026-10-01 16:48:17 | HTTP Status: 000
+Success Count: 874 | Unsuccessful Count: 6Unsuccessful request timestamp: 2026-10-01 16:48:18 | HTTP Status: 000
+Success Count: 874 | Unsuccessful Count: 7Unsuccessful request timestamp: 2026-10-01 16:48:19 | HTTP Status: 000
+Success Count: 877 | Unsuccessful Count: 8Unsuccessful request timestamp: 2026-10-01 16:48:31 | HTTP Status: 000
+Success Count: 956 | Unsuccessful Count: 9^C

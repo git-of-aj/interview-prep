@@ -1,0 +1,34 @@
+# Pre-Req: 
+# give k8s-agent-pool service principal
+# RBAC Role: Storage File Data SMB MI Admin
+# On storage account left side config > turn on Managed Identity for SMB
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: pvc-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: azure-share
+              mountPath: /mnt/azure
+      volumes:
+        - name: azure-share
+          persistentVolumeClaim:
+            claimName: azurefile-pvc

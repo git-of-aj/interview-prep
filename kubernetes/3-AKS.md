@@ -5,7 +5,52 @@
 - You can mark a StorageClass as the default for your cluster
 - When a PVC does not specify a storageClassName, the default StorageClass is used.
 > You should try to only have one StorageClass in your cluster that is marked as the default. [Most recent one is used] The reason that Kubernetes allows you to have multiple default StorageClasses is to allow for seamless migration.
+- Storage class decides if Disk is expanded can you expand PVC in container `IMPORTANT`
+```sh
+kubectl get storageclass managed-csi \
+  -o jsonpath='{.allowVolumeExpansion}{"\n"}'
+# true means you can expand
+```
 - Each StorageClass has a **provisioner** that determines what volume plugin (Azure files, local or NFS etc) is used for provisioning PVs. This field must be specified.
+
+```sh
+k get storageclass
+NAME                     PROVISIONER          RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+azurefile                file.csi.azure.com   Delete          Immediate              true                   16m
+managed-csi              disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   16m
+managed-csi-premium      disk.csi.azure.com   Delete          WaitForFirstConsumer   true                   16m
+```
+- **NAME** — The name of the StorageClass, e.g. `azurefile`.
+- **PROVISIONER** — The Kubernetes CSI driver that creates the actual storage, here `file.csi.azure.com` (Azure Files).
+- **RECLAIMPOLICY** — What happens to the PersistentVolume (PV) when its PVC is deleted; `Delete` means the underlying storage is deleted too.
+- **VOLUMEBINDINGMODE** — When Kubernetes binds/provisions the PV; `Immediate` means it happens as soon as the PVC is created.
+- **ALLOWVOLUMEEXPANSION** — Whether an existing volume can be resized; `true` means yes.
+- **AGE** — How long ago the StorageClass was created; `16m` = 16 minutes ago.
+
+```txt
+                    Do multiple pods/nodes
+                    need the SAME filesystem?
+                           |
+                    +------+------+
+                    |             |
+                   YES            NO
+                    |             |
+              Azure Files     Azure Disk
+              azurefile       managed-csi
+                    |             |
+             Need high          Need high
+             performance?       performance?
+                |                  |
+           +----+----+        +----+----+
+           |         |        |         |
+          NO        YES      NO        YES
+           |         |        |         |
+      azurefile   azurefile  managed   managed-csi-
+      -csi        -csi-      -csi      premium
+                  premium
+```
+
+- [Even Azure Blob can be used as CSI driver](https://learn.microsoft.com/en-us/azure/aks/csi-storage-drivers?pivots=azure-blob)
 
 ## PersistentVolume 
 - abstracts details of how storage is provided from how it is consumed.
@@ -70,7 +115,7 @@ spec:
 # ChatGPT:
 Sure. The easiest way to understand this is to first separate **persistent storage** from **ephemeral storage**.
 
- A **CSI driver** is the component that knows how to talk to a storage system. Kubernetes gives you three ways to use that CSI driver from a Pod.
+ A **CSI driver** is the component that knows how to talk to a storage system. Kubernetes gives you three ways to use that CSI driver from a Pod. A CSI driver is the component that lets Kubernetes communicate with an external storage system and make that storage available to Pods.
 
  ## 1\. Through a PersistentVolumeClaim — persistent storage
 
@@ -357,6 +402,13 @@ Pod → PVC → PV → CSI → Storage
                          ↑
                     stays around
 ```
+| Layer                             | Question it answers                                             | Example                  |
+| --------------------------------- | --------------------------------------------------------------- | ------------------------ |
+| Pod                               | Which storage do I need to use?                                 | `/data`                  |
+| PVC (PersistentVolumeClaim)       | How much storage and what access do I need?                     | `100Gi`, `ReadWriteOnce` |
+| PV (PersistentVolume)             | What actual Kubernetes storage resource satisfies that request? | `100Gi Azure Disk`       |
+| CSI (Container Storage Interface) | How do I communicate with the storage system?                   | `disk.csi.azure.com`     |
+| Storage                           | Where are the actual bytes stored?                              | `Azure Managed Disk`     |
 
  ### Generic ephemeral
 
@@ -609,3 +661,93 @@ AKS
  > **CSI is the storage interface/driver mechanism. PVC, generic ephemeral, and CSI ephemeral are three different ways a Pod can consume storage through that mechanism.**
 
  And **"ephemeral" means the storage is tied to the Pod's lifetime, not that CSI itself is ephemeral.**
+
+## Practical experience
+
+| Access mode | Meaning |
+| --- | --- |
+| **ReadWriteOnce (RWO)** | Read/write from one node |
+| **ReadOnlyMany (ROX)** | Read-only from multiple nodes |
+| **ReadWriteMany (RWX)** | Read/write from multiple nodes |
+| **ReadWriteOncePod (RWOP)** | Read/write by only one pod |
+
+> Pod stuck in `nginx-77d8d866d-cfb7p   0/1     ContainerCreating   0          6m35s`
+
+```txt
+Events:
+  Type     Reason              Age   From                     Message
+  ----     ------              ----  ----                     -------
+  Normal   Scheduled           94s   default-scheduler        Successfully assigned pvc-demo/nginx-77d8d866d-nlvf6 to aks-agentpool-39318956-vmss000001
+  Warning  FailedAttachVolume  95s   attachdetach-controller  Multi-Attach error for volume "pvc-72b95f22-471c-4590-81d4-067c1c1363bb" Volume is already used by pod(s) nginx-77d8d866d-f48g4
+```
+```yml
+accessModes:
+  - ReadWriteOnce
+```
+- means one node, not necessarily "one pod." For Multi Attach use `Azure Files`. That's why some Pods are `RUNNING` others not
+```txt
+k get po -o wide
+NAME                    READY   STATUS              RESTARTS   AGE   IP             NODE                                NOMINATED NODE   READINESS GATES
+nginx-77d8d866d-6dxb2   0/1     ContainerCreating   0          28s   <none>         aks-agentpool-39318956-vmss000001   <none>           <none>
+nginx-77d8d866d-6sjjm   1/1     Running             0          28s   10.244.0.72    aks-agentpool-39318956-vmss000000   <none>           <none>
+nginx-77d8d866d-9rt95   1/1     Running             0          28s   10.244.0.117   aks-agentpool-39318956-vmss000000   <none>           <none>
+nginx-77d8d866d-fhvfj   1/1     Running             0          28s   10.244.0.227   aks-agentpool-39318956-vmss000000   <none>           <none>
+nginx-77d8d866d-jqks7   0/1     ContainerCreating   0          28s   <none>         aks-agentpool-39318956-vmss000001   <none>           <none>
+nginx-77d8d866d-qz7q5   0/1     ContainerCreating   0          28s   <none>         aks-agentpool-39318956-vmss000001   <none>           <none>
+```
+- [TESTED PRACTICALLY]: Data changed by Pod 1 visible in POD connected to same PVC 
+- A StatefulSet can give each replica its own PVC:
+
+### COnnection to Azure
+The important line is:
+
+> volume.kubernetes.io/storage-provisioner: disk.csi.azure.com
+
+and your StorageClass is:
+
+> managed-csi
+
+- AKS's disk.csi.azure.com driver dynamically provisions Azure Managed Disks for this type of PVC
+- `kubectl get pv pvc-72b95f22-471c-4590-81d4-067c1c1363bb -o yaml`
+```text
+ csi:
+    driver: disk.csi.azure.com
+    volumeAttributes:
+      csi.storage.k8s.io/pv/name: pvc-72b95f22-471c-4590-81d4-067c1c1363bb
+      csi.storage.k8s.io/pvc/name: my-pvc-1
+      csi.storage.k8s.io/pvc/namespace: pvc-demo
+      requestedsizegib: "5"
+      skuname: StandardSSD_ZRS
+      storage.kubernetes.io/csiProvisionerIdentity: 1790846543059-9501-disk.csi.azure.com
+    volumeHandle: /subscriptions/38e274f8-10b9-4348-bd1d-62d18e5458d1/resourceGroups/MC_1-oct_oct-1_centralindia/providers/Microsoft.Compute/disks/pvc-72b95f22-471c-4590-81d4-067c1c1363bb
+```
+>  RECLAIM POLICY: Delete. That's important for backups. If you delete the PVC, the dynamically provisioned PV can be deleted and the underlying Azure disk can be deleted as well.
+
+### Scale azure disk // Use expanded disk in Pod
+
+```sh
+ kubectl get pvc my-pvc-1 -n pvc-demo
+NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+my-pvc-1   Bound    pvc-72b95f22-471c-4590-81d4-067c1c1363bb   5Gi        RWO            managed-csi    <unset>                 143m
+ojha [ ~ ]$ k edit pvc/my-pvc-1
+persistentvolumeclaim/my-pvc-1 edited
+ojha [ ~ ]$ kubectl get pvc my-pvc-1 -n pvc-demo
+NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+my-pvc-1   Bound    pvc-72b95f22-471c-4590-81d4-067c1c1363bb   32Gi       RWO            managed-csi    <unset>                 145m
+ojha [ ~ ]$ kubectl get pv pvc-72b95f22-471c-4590-81d4-067c1c1363bb \
+  -o jsonpath='{.spec.capacity.storage}{"\n"}'
+32Gi
+ojha [ ~ ]$ k exec -it nginx-77d8d866d-9rt95 -- sh 
+# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+overlay         123G   11G  113G   9% /
+tmpfs            64M     0   64M   0% /dev
+/dev/root       123G   11G  113G   9% /etc/hosts
+shm              64M     0   64M   0% /dev/shm
+/dev/sdb         32G  1.3M   32G   1% /usr/share/nginx/html ========> SCALED
+tmpfs           2.8G   12K  2.8G   1% /run/secrets/kubernetes.io/serviceaccount
+tmpfs           4.0K     0  4.0K   0% /proc/acpi
+```
+
+### Connect Azure file share 
+[MS Docs](https://learn.microsoft.com/en-gb/azure/storage/files/files-managed-identities?utm_source=chatgpt.com&tabs=portal&pivots=linux#configure-the-managed-identitys-access-property-on-your-storage-account)
