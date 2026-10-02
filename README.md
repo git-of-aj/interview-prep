@@ -1,4 +1,4 @@
-## Troubleshooting
+## Troubleshooting Tips
 Here’s a summary of 10 brutal troubleshooting facts I’ve learned:
 
 1) Check logs first, always – Logs contain the first clues; learn how to filter, search, and analyze them efficiently. 
