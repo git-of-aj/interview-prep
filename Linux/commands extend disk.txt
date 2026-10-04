@@ -1,0 +1,232 @@
+Yes. Based on your outputs, **you only need to extend ONE of the two data disks**, not both.
+
+ Because `dbvg` already has \~110 GiB free, to increase `/u01` by **200 GiB**, you need roughly **90+ GiB additional capacity** in the VG. I would recommend expanding **Azure LUN 0 / `/dev/sda` (the 1800-GiB disk)** by **200 GiB**. That is simple and leaves \~110 GiB of VG free afterward.
+
+ Azure supports online expansion of eligible data disks, and LVM/filesystems can generally be extended online.  Microsoft Learn+1
+
+ ### Your current layout
+
+```
+Azure disk0, LUN 0, 1800 GiB
+        |
+      /dev/sda
+        |
+        |\
+        | \
+        |  \
+        +--- VG: dbvg --------+
+        |                      |
+Azure disk1, LUN 1, 100 GiB    |
+        |                      |
+      /dev/sdc                LV: u01
+                               |
+                              /u01
+```
+
+ Current:
+
+```
+dbvg size:  ~1.86 TiB
+dbvg free:  ~110 GiB
+u01 LV:     ~1.75 TiB
+```
+
+ ## Recommended procedure
+
+ ### Step 1 — Take a backup/snapshot
+
+ I strongly recommend having a current backup/snapshot before changing storage. Azure also recommends a backup before disk expansion operations.  Microsoft Learn
+
+ ### Step 2 — Increase Azure `disk0`
+
+ In Azure Portal:
+
+ **VM → Disks → Data disks → `dsk-prod-isdb-uaen-fisdbd01-disk0` → Size + performance**
+
+ Current:
+
+```
+1800 GiB
+```
+
+ Change to:
+
+```
+2000 GiB
+```
+
+ So you're adding **200 GiB** to `/dev/sda`.
+
+ You do **not** need to increase `disk1`.
+
+ For eligible Azure data disks, this can be done while the VM is running; Azure documents online expansion for supported data disks.  Microsoft Learn
+
+---
+
+ ### Step 3 — Rescan `/dev/sda`
+
+ On Linux:
+
+```
+echo 1 | sudo tee /sys/class/block/sda/device/rescan
+```
+
+ Then verify:
+
+```
+lsblk /dev/sda
+```
+
+ You should now see approximately:
+
+```
+sda    2.0T
+```
+
+ Microsoft documents this rescan approach for making Linux recognize the newly expanded disk size.  Microsoft Learn
+
+---
+
+ ### Step 4 — Resize the LVM Physical Volume
+
+ Your PV is the **whole disk `/dev/sda`**, not a partition.
+
+ So:
+
+```
+sudo pvresize /dev/sda
+```
+
+ Then verify:
+
+```
+sudo pvs
+sudo vgs
+```
+
+ Before expansion you had:
+
+```
+/dev/sda    <1.76t    <110.00g free
+```
+
+ After adding 200 GiB, you should have roughly:
+
+```
+/dev/sda    ~1.95t    ~310g free
+```
+
+ and `dbvg` should have approximately **310 GiB free**.
+
+---
+
+ ### Step 5 — Extend the `u01` LV by exactly 200 GiB
+
+ Your LV is:
+
+```
+/dev/dbvg/u01
+```
+
+ Run:
+
+```
+sudo lvextend -L +200G /dev/dbvg/u01
+```
+
+ Then:
+
+```
+sudo lvs
+```
+
+ At this point the **LV** will be 200 GiB larger, but we still need to make the filesystem use that space.
+
+---
+
+ ### Step 6 — Extend the filesystem
+
+ First check the filesystem type:
+
+```
+df -Th /u01
+```
+
+ If it is **XFS**, which is very common on RHEL:
+
+```
+sudo xfs_growfs /u01
+```
+
+ If it is **ext4**:
+
+```
+sudo resize2fs /dev/dbvg/u01
+```
+
+ Alternatively, you can often do the LV + filesystem expansion in one step:
+
+```
+sudo lvextend -r -L +200G /dev/dbvg/u01
+```
+
+ Red Hat documents online LV/filesystem expansion, and Microsoft also documents `lvextend -r` for growing the LV and filesystem.  Red Hat Customer Portal+1
+
+ **For a production database server, I personally prefer doing the `pvresize`, `lvextend`, and filesystem resize as separate steps**, checking each stage rather than blindly using `-r`.
+
+---
+
+ ## Will you lose existing data?
+
+ **No, not from this expansion procedure.**
+
+ You're **expanding**, not shrinking or recreating anything:
+
+```
+1800 GiB Azure disk
+        ↓
+2000 GiB Azure disk
+
+existing data remains
+        ↓
+PV gets additional extents
+        ↓
+VG gets additional free space
+        ↓
+LV gets +200 GiB
+        ↓
+filesystem grows into the new space
+```
+
+ You should still have a valid backup before doing it. **Do not use any disk-shrinking operation**; Azure explicitly warns that shrinking an existing disk isn't supported and can result in data loss.  Microsoft Learn
+
+---
+
+ ## Will the VM need a restart?
+
+ **Normally, no.**
+
+ For your situation:
+
+ - Azure data disk expansion → can be online for supported disk configurations.
+- `/dev/sda` rescan → online.
+- `pvresize` → online.
+- `lvextend` → online.
+- XFS growth → online.
+- ext4 growth → can be online.
+
+ So **there should be no VM restart and no `/u01` unmount required**. Microsoft specifically documents online expansion for eligible Azure data disks, and Red Hat documents online LVM/filesystem expansion.  Microsoft Learn+1
+
+ ### One thing I want you to check before executing
+
+ Run:
+
+```
+df -Th /u01
+```
+
+ Send me that output.
+
+ Then I can give you the **exact production-safe command sequence for your filesystem**, including the verification commands after every step.
+
+  Sources

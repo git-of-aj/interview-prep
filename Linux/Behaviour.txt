@@ -1,0 +1,3 @@
+1. Have SS of windows services/app features (behavior) - like sso login/relevant log paths/SS of azure configs
+know dependencies - (Python / Java / start db first then app) 
+2. Map Common Error => last time cause of error => Commands to Verify cause 

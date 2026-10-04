@@ -1,0 +1,135 @@
+============================== Rating ToolKit (App GW) ====================================
+
+We are encountering an issue with the Azure Application Gateway configuration affecting the following domains routed to the backend Apache server on AZAPRTT01:
+
+rm2rcltest.idbhq.org (Rating Manager v2 – Angular application)
+
+re2rcltest.idbhq.org (Rating Engine v2 – Spring Boot application)
+
+Both applications operate correctly when accessed directly on the Apache server. However, when accessed through the Azure Application Gateway, the request results in a 502 Bad Gateway error returned by the gateway.
+
+Evidence and Technical Symptoms
+1. Internal test on AZAPRTT01 (Apache backend)
+Using curl with the correct Host header produces the expected response:
+
+curl -I http://localhost -H "Host: rm2rcltest.idbhq.org"
+
+HTTP/1.1 301 Moved Permanently
+Location: https://rm2rcltest.idbhq.org/
+Server: Apache/2.4.46
+This confirms the Apache VirtualHost for rm2rcltest.idbhq.org is functioning correctly.
+
+2. External test through Application Gateway
+When performing the same test from a session desktop (which routes through the Application Gateway), we receive:
+
+curl -I https://rm2rcltest.idbhq.org -H "Host: rm2rcltest.idbhq.org"
+
+HTTP/1.1 502 Bad Gateway
+Server: Microsoft-IIS/10.0
+This confirms the request is not reaching Apache successfully and the 502 is being returned by the Application Gateway.
+
+3. Comparison with a working domain (Rating Manager v1)
+For reference, another domain routed through the gateway works as expected:
+
+curl -I https://rmrcltest.idbhq.org -H "Host: rmrcltest.idbhq.org"
+
+HTTP/1.1 200 OK
+Server: Apache/2.4.46
+This further indicates that the issue is limited to the new domain configurations and likely related to Host header handling or health probe configuration.
+
+Root Cause Summary
+The behavior strongly indicates that the Application Gateway is not forwarding the original Host header to the backend for the new domains. Apache relies on the Host header to select the correct VirtualHost. When the Application Gateway overwrites the Host header (for example, replacing it with the backend IP or internal hostname), Apache routes the request to the wrong VirtualHost, causing the probe to fail and the backend to be marked unhealthy. This results in the 502 response.
+
+Internally, Apache receives the correct Host header and routes properly, confirming the backend configuration is correct. The failure only occurs when routed through the Application Gateway.
+
+Required Changes on the Application Gateway
+Please review and update the HTTP Settings for rm2rcltest.idbhq.org and re2rcltest.idbhq.org as follows:
+
+HTTP Settings
+Protocol: HTTPS
+
+Port: 443
+
+Use host name from incoming request: Enabled
+
+Override with specific host name: Disabled
+
+Pick host name from backend target: Disabled
+
+Use well-known headers: Enabled
+
+Allow self-signed certificates (if applicable): Enabled
+
+These settings ensure that the backend receives the correct Host header.
+
+Health Probe Requirements
+Each domain requires a dedicated probe:
+
+Probe for rm2rcltest.idbhq.org
+
+Protocol: HTTPS
+
+Host: rm2rcltest.idbhq.org
+
+Path: /
+
+Probe for re2rcltest.idbhq.org
+
+Protocol: HTTPS
+
+Host: re2rcltest.idbhq.org
+
+Path: /
+
+If the probe uses an IP address, backend pool FQDN, or internal hostname, Apache will select the wrong vhost and mark the pool as unhealthy.
+
+Verification Tests After the Change
+Confirm backend health moves to Healthy for both domains.
+
+Test forced Host header routing through the gateway:
+
+curl -I https://<GatewayPublicIP> -H "Host: rm2rcltest.idbhq.org"
+Expected result:
+
+301 redirect to https://rm2rcltest.idbhq.org:9103/ (Angular v2)
+
+Validate external access:
+
+curl -I https://rm2rcltest.idbhq.org
+curl -I https://re2rcltest.idbhq.org
+Ensure the gateway no longer returns 502.
+
+==============================================================================================================
+
+===================== FI (Zombie service) ===========================================
+Symptoms
+
+FusionInvest clients and services were unable to launch due to not being able to the AMQ messaging bus. This also cause some night batches to fail.
+
+ 
+
+Troubleshooting
+
+With the help of the Application team we connected on the FI application server for a remote session. It was notice the AMQ would start then stop immediately. Looking at the AMQ logs (only accessible locally D:\FusionInvest\Servers\Sophis\AMQ\apache-activemq\data), it was obeservered the process could not bind on the standard port 61616.
+
+Further investigation revealed a java process was already using the 61616 which was identified to be the previous AMQ process which was unhooked from the windows service and because zombie (unresponsive)
+
+ 
+
+Remediation
+
+Once zombie process was identified (netstat -ano | findstr :61616), it was manually killed and AMQ Services could be started normally (from Windows Services)
+
+A full stop/start cycle was then triggered, services spawn up normally, and FI Client connection was restored.
+
+ 
+
+Recommendation
+
+Monitor start/stop processes during the next few days
+Add an additional monitoring for unexpected ports still in use after stop sequence to identify possible zombie processes.
+ 
+
+Note: The reason why the AMQ process became zombie is currently unclear, and could be due de several factor (Improper Windows process management, Java process running out of memory and becoming unresponsive, etc.). It was also observe that Keycloack (java process but independent from any on FI services) wasn’t working during the troubleshooting although it should. This may point out to a java issue (automatic update). Analysis of AMQ and Keycloak will be performed to identify potential additional clues.
+
+=============================================================================================================
